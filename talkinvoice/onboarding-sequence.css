@@ -1,0 +1,875 @@
+/**
+ * Onboarding sequence — fixed bottom CTA + marketing dark surfaces.
+ * After tokens.css + shell.css.
+ */
+:root {
+  --onb-marketing-dark-bg: #12151c;
+  --onb-marketing-dark-surface: #1a2230;
+}
+
+/* Fixed CTA: scroll in __scroll, button always bottom inside 375×812 */
+.onb-seq {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.onb-seq__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.onb-seq__footer {
+  flex-shrink: 0;
+  padding: 12px var(--margin-wide) max(8px, env(safe-area-inset-bottom, 0));
+  background: inherit;
+}
+
+.onb-seq-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 56px;
+  padding: 16px;
+  border: none;
+  border-radius: var(--radius-small);
+  background: var(--color-brand-base);
+  color: var(--color-text-wt-primary);
+  font-family: inherit;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-em-weight);
+  line-height: 1.3;
+  letter-spacing: var(--text-body-track);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.onb-seq-cta:active {
+  opacity: 0.92;
+}
+
+/* Dark marketing screens */
+.device-screen--marketing-dark {
+  background: var(--onb-marketing-dark-bg);
+  color: var(--color-text-wt-primary);
+}
+
+.device-screen--marketing-dark .onb-seq__footer {
+  background: var(--onb-marketing-dark-bg);
+}
+
+.device-screen--marketing-dark .home-indicator {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* ——— Landing screen (Home step 1) — Figma node 14002:3981, optimised ——— */
+.onb-landing {
+  background: var(--color-bg-app);
+}
+
+/*
+ * Layout (812px screen):
+ *  0–479   media / video placeholder
+ *  489–519 VOICE AI badge (10px gap below media)
+ *  529–670 title section: app-name(41) + gap(8) + tagline(68) + gap(8) + trades(16)
+ *  680–812 footer: CTA(56) + gap(16) + legal(24) + home-indicator(34) + 2px bottom
+ */
+
+/* Full-bleed video area */
+.onb-landing__media {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 479px;
+  /* Placeholder gradient — replaced by real video in production */
+  background:
+    linear-gradient(
+      180deg,
+      transparent 60%,
+      var(--color-bg-app) 100%
+    ),
+    linear-gradient(
+      160deg,
+      #1a2233 0%,
+      #243448 40%,
+      #2e4060 70%,
+      #5e7a96 90%
+    );
+  z-index: 0;
+}
+
+/* Subtle wave-form hint at the bottom of the media — suggests voice/AI */
+.onb-landing__media::after {
+  content: '';
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 24px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 24'%3E%3Crect x='4' y='8' width='4' height='8' rx='2' fill='rgba(255,255,255,0.35)'/%3E%3Crect x='12' y='4' width='4' height='16' rx='2' fill='rgba(255,255,255,0.45)'/%3E%3Crect x='20' y='2' width='4' height='20' rx='2' fill='rgba(255,255,255,0.55)'/%3E%3Crect x='28' y='5' width='4' height='14' rx='2' fill='rgba(255,255,255,0.6)'/%3E%3Crect x='36' y='1' width='4' height='22' rx='2' fill='rgba(255,255,255,0.7)'/%3E%3Crect x='44' y='3' width='4' height='18' rx='2' fill='rgba(255,255,255,0.8)'/%3E%3Crect x='52' y='0' width='4' height='24' rx='2' fill='rgba(255,255,255,0.9)'/%3E%3Crect x='60' y='2' width='4' height='20' rx='2' fill='rgba(255,255,255,0.85)'/%3E%3Crect x='68' y='0' width='4' height='24' rx='2' fill='rgba(255,255,255,0.9)'/%3E%3Crect x='76' y='4' width='4' height='16' rx='2' fill='rgba(255,255,255,0.75)'/%3E%3Crect x='84' y='1' width='4' height='22' rx='2' fill='rgba(255,255,255,0.6)'/%3E%3Crect x='92' y='5' width='4' height='14' rx='2' fill='rgba(255,255,255,0.5)'/%3E%3Crect x='100' y='3' width='4' height='18' rx='2' fill='rgba(255,255,255,0.4)'/%3E%3Crect x='108' y='8' width='4' height='8' rx='2' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* VOICE AI badge — brand blue pill, 10px below media */
+.onb-landing__badge {
+  position: absolute;
+  top: 489px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand-base);
+  color: var(--color-text-wt-primary);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+.onb-landing__badge-label {
+  font-size: var(--text-footnote-size);       /* 13px */
+  font-weight: var(--text-subhead-em-weight); /* 600 */
+  line-height: 18px;
+  letter-spacing: -0.08px;
+}
+
+.onb-landing__badge-star {
+  font-size: 11px;
+  line-height: 1;
+  opacity: 0.85;
+}
+
+/* Title section: app name + logo + tagline + trades */
+.onb-landing__title {
+  position: absolute;
+  top: 529px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  z-index: 1;
+}
+
+/* Row: "TalkInvoice" + app icon */
+.onb-landing__name-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.onb-landing__app-name {
+  margin: 0;
+  font-size: var(--text-large-title-size);      /* 34px */
+  font-weight: var(--text-large-title-weight);  /* 700 */
+  line-height: var(--text-large-title-line);    /* 41px */
+  letter-spacing: var(--text-large-title-track);/* 0.4px */
+  color: var(--color-text-primary);
+}
+
+/* App logo: brand-blue rounded square with sonar rings (SVG inline) */
+.onb-landing__app-logo {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Main tagline — speed + simplicity */
+.onb-landing__tagline {
+  margin: 0;
+  font-size: var(--text-title1-size);   /* 26px */
+  font-weight: var(--text-body-weight); /* 400 */
+  line-height: var(--text-title1-line); /* 34px */
+  letter-spacing: 0.38px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+/* Trade audience signal — passive, small, 4 representative trades */
+.onb-landing__trades {
+  margin: 0;
+  font-size: var(--text-caption-size);  /* 12px */
+  line-height: var(--text-caption-line);/* 16px */
+  letter-spacing: 0.1px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* Footer: CTA + legal + home indicator */
+.onb-landing__footer {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1;
+}
+
+.onb-landing__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border-radius: var(--radius-small);
+  background: var(--color-brand-base);
+  color: var(--color-text-wt-primary);
+  font-family: inherit;
+  font-size: var(--text-body-size);        /* 16px */
+  font-weight: var(--text-body-em-weight); /* 500 */
+  line-height: 1.3;
+  letter-spacing: var(--text-body-track);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.onb-landing__cta:active {
+  opacity: 0.92;
+}
+
+.onb-landing__bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 16px;
+}
+
+.onb-landing__legal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+}
+
+.onb-landing__legal-link,
+.onb-landing__legal-sep {
+  font-size: var(--text-caption-size);
+  line-height: var(--text-caption-line);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  white-space: pre;
+}
+
+/* Home indicator: break out of footer's 20px padding to span full 375px */
+.onb-landing .home-indicator-wrap {
+  width: calc(100% + 40px);
+  max-width: none;
+  margin: 0 -20px;
+}
+
+/* ——— Voice Core screen (step 2) — Figma node 14002:3998 ——— */
+/*
+ * Layout (812px screen):
+ *  0–504   media / video placeholder (full bleed, header + status-bar float above)
+ *  44–98   nav header (back + skip, z-index 5)
+ *  504–654 title: h1(82) + gap(10) + sub(42) + top-padding(16)
+ *  696–812 footer: CTA(56) + gap(24) + home-indicator(34) + 2px bottom
+ */
+.onb-voice {
+  background: var(--color-bg-app);
+}
+
+/* Full-bleed media: 504px (25px taller than Home's 479px) */
+.onb-voice__media {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 504px;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 55%,
+      var(--color-bg-app) 100%
+    ),
+    linear-gradient(
+      160deg,
+      #0d1828 0%,
+      #132240 45%,
+      #1c3558 75%,
+      #2a4d7a 100%
+    );
+  z-index: 0;
+}
+
+/* Animated voice-wave bars over the media */
+.onb-voice__media::after {
+  content: '';
+  position: absolute;
+  bottom: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 32px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 140 32'%3E%3Crect x='4' y='10' width='5' height='12' rx='2.5' fill='rgba(255,255,255,0.30)'/%3E%3Crect x='13' y='5' width='5' height='22' rx='2.5' fill='rgba(255,255,255,0.40)'/%3E%3Crect x='22' y='2' width='5' height='28' rx='2.5' fill='rgba(255,255,255,0.55)'/%3E%3Crect x='31' y='6' width='5' height='20' rx='2.5' fill='rgba(255,255,255,0.65)'/%3E%3Crect x='40' y='0' width='5' height='32' rx='2.5' fill='rgba(255,255,255,0.80)'/%3E%3Crect x='49' y='3' width='5' height='26' rx='2.5' fill='rgba(255,255,255,0.90)'/%3E%3Crect x='58' y='0' width='5' height='32' rx='2.5' fill='white'/%3E%3Crect x='67' y='2' width='5' height='28' rx='2.5' fill='rgba(255,255,255,0.95)'/%3E%3Crect x='76' y='0' width='5' height='32' rx='2.5' fill='white'/%3E%3Crect x='85' y='4' width='5' height='24' rx='2.5' fill='rgba(255,255,255,0.85)'/%3E%3Crect x='94' y='1' width='5' height='30' rx='2.5' fill='rgba(255,255,255,0.70)'/%3E%3Crect x='103' y='7' width='5' height='18' rx='2.5' fill='rgba(255,255,255,0.55)'/%3E%3Crect x='112' y='3' width='5' height='26' rx='2.5' fill='rgba(255,255,255,0.40)'/%3E%3Crect x='121' y='11' width='5' height='10' rx='2.5' fill='rgba(255,255,255,0.25)'/%3E%3C/svg%3E") center / contain no-repeat;
+  animation: voice-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes voice-pulse {
+  0%, 100% { opacity: 0.7; transform: translateX(-50%) scaleY(1); }
+  50%       { opacity: 1;   transform: translateX(-50%) scaleY(1.12); }
+}
+
+/* Navigation header: back | progress(flex:1) | skip */
+.onb-voice__header {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+/* Back chevron button */
+.onb-voice__back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-left: -10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Skip text link */
+.onb-voice__skip {
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-em-weight);
+  line-height: 1.3;
+  letter-spacing: var(--text-body-track);
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+}
+
+.onb-voice__skip:active { opacity: 0.75; }
+
+/* Title section: left-aligned, starts at base of media */
+.onb-voice__title {
+  position: absolute;
+  top: 504px;
+  left: 0;
+  right: 0;
+  padding: 16px 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 1;
+}
+
+.onb-voice__heading {
+  margin: 0;
+  font-size: var(--text-large-title-size);       /* 34px */
+  font-weight: var(--text-large-title-weight);   /* 700 */
+  line-height: var(--text-large-title-line);     /* 41px */
+  letter-spacing: var(--text-large-title-track); /* 0.4px */
+  color: var(--color-text-primary);
+}
+
+.onb-voice__sub {
+  margin: 0;
+  font-size: var(--text-body-size);        /* 16px */
+  font-weight: var(--text-body-em-weight); /* 500 */
+  line-height: 21px;
+  letter-spacing: -0.31px;
+  color: var(--color-text-secondary);
+}
+
+/* Footer: Continue + home indicator */
+.onb-voice__footer {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 0 20px;
+  z-index: 1;
+}
+
+.onb-voice__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border-radius: var(--radius-small);
+  background: var(--color-brand-base);
+  color: var(--color-text-wt-primary);
+  font-family: inherit;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-em-weight);
+  line-height: 1.3;
+  letter-spacing: var(--text-body-track);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.onb-voice__cta:active { opacity: 0.92; }
+
+/* Progress bar track is white/translucent because the header floats over dark media */
+.onb-voice .ob-flow-progress {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Home indicator: break out of footer's 20px padding to full width */
+.onb-voice .home-indicator-wrap {
+  width: calc(100% + 40px);
+  max-width: none;
+  margin: 0 -20px;
+}
+
+.onb-hero-video {
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 220px;
+  border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+  background: var(--color-bg-grouped);
+  background-image: linear-gradient(145deg, #2a3548 0%, #1a2230 100%);
+}
+
+.device-screen--marketing-dark .onb-hero-video {
+  background: var(--onb-marketing-dark-surface);
+  background-image: linear-gradient(160deg, #243044 0%, #151a24 100%);
+}
+
+.onb-hero-video--tall {
+  min-height: 320px;
+}
+
+.onb-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 20px var(--margin-wide) 8px;
+}
+
+.onb-chip {
+  padding: 10px 14px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-grouped);
+  border: 1px solid var(--color-border-secondary);
+  font-size: var(--text-subhead-size);
+  font-weight: var(--text-subhead-em-weight);
+  color: var(--color-text-primary);
+}
+
+.device-screen--marketing-dark .onb-chip {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--color-text-wt-primary);
+}
+
+.onb-seq-lead {
+  margin: 0;
+  padding: 0 var(--margin-wide);
+  font-size: var(--text-title1-size);
+  font-weight: var(--text-title1-weight);
+  line-height: var(--text-title1-line);
+  text-align: center;
+  color: var(--color-text-primary);
+}
+
+.device-screen--marketing-dark .onb-seq-lead {
+  color: var(--color-text-wt-primary);
+}
+
+.onb-seq-sub {
+  margin: 12px 0 0;
+  padding: 0 var(--margin-wide);
+  font-size: var(--text-body-size);
+  line-height: 1.45;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.device-screen--marketing-dark .onb-seq-sub {
+  color: var(--color-text-wt-secondary);
+}
+
+.onb-center-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px var(--margin-wide) 24px;
+  text-align: center;
+  min-height: 280px;
+}
+
+.onb-mega {
+  margin: 0;
+  font-size: var(--text-large-title-size);
+  font-weight: var(--text-large-title-weight);
+  line-height: var(--text-large-title-line);
+  letter-spacing: var(--text-large-title-track);
+  color: inherit;
+}
+
+.onb-tagline-sm {
+  margin: 16px 0 0;
+  font-size: var(--text-title3-size);
+  font-weight: var(--text-body-weight);
+  line-height: 1.35;
+  color: var(--color-text-wt-secondary);
+  max-width: 300px;
+}
+
+.onb-stars {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  padding: 24px 0;
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: 0;
+  color: #e8b321;
+}
+
+.onb-load-spinner {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 20px;
+  border: 3px solid var(--color-border-secondary);
+  border-top-color: var(--color-brand-base);
+  border-radius: 50%;
+  animation: onb-spin 0.85s linear infinite;
+}
+
+.device-screen--marketing-dark .onb-load-spinner {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: var(--color-brand-base);
+}
+
+@keyframes onb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.onb-trial-burst {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 24px auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-brand-base), #0d4a9e);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-wt-primary);
+  font-size: var(--text-title3-size);
+  font-weight: var(--text-title3-weight);
+  text-align: center;
+  line-height: 1.2;
+  animation: onb-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes onb-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(22, 104, 217, 0.35);
+  }
+  50% {
+    transform: scale(1.04);
+    box-shadow: 0 0 0 16px rgba(22, 104, 217, 0);
+  }
+}
+
+.trial-screen--paywall-dark {
+  background: var(--onb-marketing-dark-bg) !important;
+}
+
+.trial-screen--paywall-dark .trial-screen__bg {
+  opacity: 0.12;
+}
+
+.trial-screen--paywall-dark .trial-title {
+  color: var(--color-text-wt-primary);
+}
+
+.trial-screen--paywall-dark .trial-step__title {
+  color: var(--color-text-wt-primary);
+}
+
+.trial-screen--paywall-dark .trial-step__desc {
+  color: var(--color-text-wt-secondary);
+}
+
+.trial-screen--paywall-dark .trial-track {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.trial-screen--paywall-dark .trial-step__stem {
+  background: var(--color-brand-base);
+}
+
+.trial-screen--paywall-dark .trial-nav__btn {
+  color: var(--color-text-wt-secondary);
+}
+
+/* ——— Pain Core screen (step 3) — absolute-position redesign ——— */
+/*
+ * Layout (812px screen):
+ *  0– 44   status bar (transparent, white icons, z-index 5)
+ *  44– 92  header: back(←) + progress(22%)  (48 px)
+ *  92–180  title block: heading + hr         (88 px)
+ *  180–696 pain list: 3 × 172 px items       (516 px total)
+ *  704–812 footer: CTA(56) + gap(16) + home-indicator(34) + 2px bottom
+ */
+.onb-pain {
+  background: #1a1512;
+}
+
+/* Navigation header: back + progress (no skip needed) */
+.onb-pain__header {
+  position: absolute;
+  top: 44px;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  z-index: 5;
+}
+
+/* Dark-bg colour overrides for shared nav classes */
+.onb-pain .ob-flow-back       { color: rgba(255, 255, 255, 0.70); }
+.onb-pain .ob-flow-progress   { background: rgba(255, 255, 255, 0.15); }
+
+/* Title block */
+.onb-pain__title {
+  position: absolute;
+  top: 92px;
+  left: 0;
+  right: 0;
+  padding: 16px 20px 0;
+  box-sizing: border-box;
+  z-index: 1;
+}
+
+.onb-pain__heading {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.2px;
+  color: #fff;
+}
+
+.onb-pain__rule {
+  border: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.10);
+  margin: 8px 0 0;
+}
+
+/* Pain list container */
+.onb-pain__list {
+  position: absolute;
+  top: 180px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+}
+
+/* Each item is exactly 172 px tall — three of them fill 180–696 px */
+.onb-pain__item {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 172px;
+  padding: 24px 20px;
+  box-sizing: border-box;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.onb-pain__item:nth-child(1) { top:   0px; }
+.onb-pain__item:nth-child(2) { top: 172px; }
+.onb-pain__item:nth-child(3) { top: 344px; }
+
+/* 44×44 icon box */
+.onb-pain__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 10px;
+}
+
+.onb-pain__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.onb-pain__item h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 22px;
+  letter-spacing: -0.2px;
+  color: #fff;
+}
+
+.onb-pain__item p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 18px;
+  color: rgba(255, 255, 255, 0.50);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Footer */
+.onb-pain__footer {
+  position: absolute;
+  bottom: 2px;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0 20px;
+  z-index: 1;
+}
+
+.onb-pain__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
+  border-radius: var(--radius-small);
+  background: var(--color-brand-base);
+  color: var(--color-text-wt-primary);
+  font-family: inherit;
+  font-size: var(--text-body-size);
+  font-weight: var(--text-body-em-weight);
+  line-height: 1.3;
+  letter-spacing: var(--text-body-track);
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.onb-pain__cta:active { opacity: 0.92; }
+
+/* Home indicator: break out of footer's 20px padding to full screen width */
+.onb-pain .home-indicator-wrap {
+  width: calc(100% + 40px);
+  max-width: none;
+  margin: 0 -20px;
+}
+
+.onb-pain .home-indicator {
+  background: rgba(255, 255, 255, 0.30);
+}
+
+/* ——— Shared progress-bar + mini-header (for pages using onboarding-sequence.css) ——— */
+/* Mirrors the ob-flow-* pattern from onboarding-flow.css so all onboarding pages
+   can use the same progress-bar markup regardless of which stylesheet they import. */
+
+.ob-flow-header {
+  flex-shrink: 0;
+  padding: 4px var(--margin-wide) 8px;
+}
+
+.ob-flow-header-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ob-flow-back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -6px 0 -6px -10px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-radius: var(--radius-xsmall);
+  flex-shrink: 0;
+}
+
+.ob-flow-back .lucide {
+  width: var(--icon-medium);
+  height: var(--icon-medium);
+}
+
+.ob-flow-back:active { opacity: 0.85; }
+
+.ob-flow-progress {
+  flex: 1;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-grouped);
+  overflow: hidden;
+}
+
+.ob-flow-progress__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-brand-base);
+  transition: width 0.35s ease;
+}
+
+/* Dark-bg overrides */
+.device-screen--marketing-dark .ob-flow-progress,
+.trial-screen--paywall-dark .ob-flow-progress {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.device-screen--marketing-dark .ob-flow-back {
+  color: var(--color-text-wt-secondary);
+}

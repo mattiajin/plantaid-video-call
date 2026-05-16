@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>Settings — Talkinvoice</title>
+  <!-- Brand: tokens.css --color-brand-*. PRD: voice-to-invoice (Invoice Maker POC). No hard-coded hex. -->
+  <!-- Figma: PoC-Starter---SF-Symbol — file KfpzCgNhgKu5c1hNgcgYtM, node 8197:6434 -->
+  <!-- Icons: filled SVG (currentColor). SF Symbols font is not bundled; native app → Image(systemName:). -->
+  <!-- Inter: SIL Open Font License — free SF-like fallback (fonts.google.com). Apple platforms still use SF Pro via the system stack below. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <style>
+    /* Page: Settings — PoC-Starter---SF-Symbol 8197:6434. Shared: tokens.css + shell.css */
+
+    /* Header — Figma: status 44px + nav 54px; horizontal inset 20px */
+    .nav-header {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: var(--layout-status-bar-h);
+      width: 100%;
+      max-width: var(--layout-screen-w);
+      margin: 0 auto;
+      height: var(--layout-nav-bar-h);
+      padding: 0 var(--margin-wide);
+      background: var(--color-bg-app);
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    .nav-header__row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      min-height: 0;
+    }
+
+    .nav-header__left {
+      display: flex;
+      align-items: center;
+      width: 24px;
+      flex-shrink: 0;
+    }
+
+    .nav-header__title {
+      flex: 1 1 0;
+      min-width: 0;
+      margin: 0;
+      font-size: var(--text-nav-title-size);
+      font-weight: var(--text-nav-title-weight);
+      line-height: var(--text-nav-title-line);
+      letter-spacing: var(--text-nav-title-track);
+      text-align: center;
+      color: var(--color-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav-header__right {
+      width: 24px;
+      height: 21px;
+      flex-shrink: 0;
+    }
+
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: default;
+    }
+
+    /* Main: below nav + 24px; horizontal 20px; 24px between Go Plus and list */
+    .content {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(
+        var(--layout-status-bar-h) + var(--layout-nav-bar-h) + var(--layout-section-gap)
+      );
+      bottom: 100px;
+      padding: 0 var(--margin-wide) 16px;
+      display: flex;
+      flex-direction: column;
+      gap: var(--layout-section-gap);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Subscribe card */
+    .subscribe {
+      width: 100%;
+      background: var(--color-brand-light);
+      border: 1px solid var(--color-brand-base);
+      border-radius: var(--radius-medium);
+      overflow: hidden;
+    }
+
+    .subscribe__inner {
+      padding: 16px 20px;
+    }
+
+    .subscribe__row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+    }
+
+    .subscribe__icon {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      color: var(--color-brand-base);
+    }
+
+    .subscribe__body {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .subscribe__text {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .subscribe__title {
+      margin: 0;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      line-height: var(--text-body-line);
+      letter-spacing: var(--text-body-track);
+      color: var(--color-brand-base);
+    }
+
+    .subscribe__subtitle {
+      margin: 0;
+      font-size: var(--text-caption-size);
+      font-weight: var(--text-subhead-weight);
+      line-height: var(--text-caption-line);
+      letter-spacing: var(--text-caption-track);
+      color: var(--color-text-secondary);
+    }
+
+    .btn-upgrade {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 30px;
+      padding: 6px 10px;
+      gap: 4px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+      font-size: var(--text-subhead-btn-size);
+      font-weight: var(--text-body-em-weight);
+      line-height: var(--text-subhead-btn-line);
+      letter-spacing: var(--text-subhead-btn-track);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* List card */
+    .list-card {
+      width: 100%;
+      background: var(--color-bg-card);
+      border-radius: var(--radius-medium);
+      overflow: hidden;
+    }
+
+    .list-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--layout-list-row-h);
+      padding: 0 var(--margin-regular);
+      width: 100%;
+    }
+
+    .list-row__inner {
+      flex: 1 1 0;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      height: 100%;
+      padding-bottom: 1px;
+    }
+
+    .list-row__inner--with-separator {
+      padding-bottom: 0;
+      justify-content: flex-start;
+    }
+
+    .list-row__inner--with-separator .list-row__line {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    .list-row__line {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .list-row__title-wrap {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: var(--layout-list-row-h);
+      min-width: 0;
+    }
+
+    .list-row__title {
+      margin: 0;
+      min-height: 22px;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      line-height: var(--text-body-line);
+      letter-spacing: var(--text-body-track);
+      color: var(--color-text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .list-row__trail {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 16px;
+      height: 100%;
+      line-height: 0;
+    }
+
+    .list-row__chevron {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-text-disabled);
+    }
+
+    .list-separator {
+      height: 1px;
+      width: 100%;
+      background: var(--color-border-disabled);
+      flex-shrink: 0;
+    }
+
+    /* Bottom — copyright + home indicator */
+    .bottom {
+      position: absolute;
+      left: 50%;
+      bottom: 0;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--layout-screen-w);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .copyright {
+      margin: 0;
+      width: 100%;
+      text-align: center;
+      font-size: var(--text-caption-size);
+      font-weight: var(--text-body-weight);
+      line-height: var(--text-caption-line);
+      letter-spacing: var(--text-caption-track);
+      color: var(--color-text-tertiary);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Onboarding">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Flow only · app UI in the phone frame.</p>
+    </aside>
+    <div class="app-main">
+  <div class="device-shell">
+    <main class="device-screen settings" data-node-id="8197:6434" data-name="Settings">
+      <!-- Status bar -->
+      <div class="status-bar status-bar--fixed" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+        <div class="status-bar__time">9:41</div>
+        <div class="status-bar__levels">
+          <span class="status-bar__icon status-bar__icon--cellular"></span>
+          <span class="status-bar__icon status-bar__icon--wifi"></span>
+          <span class="status-bar__icon status-bar__icon--battery"></span>
+        </div>
+      </div>
+
+      <!-- Navigation header -->
+      <header class="nav-header" data-node-id="8840:1786">
+        <div class="nav-header__row">
+          <div class="nav-header__left">
+            <button type="button" class="icon-btn" aria-label="Back">
+              <svg class="lucide lucide--nav icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
+            </button>
+          </div>
+          <h1 class="nav-header__title">Settings</h1>
+          <div class="nav-header__right" aria-hidden="true"></div>
+        </div>
+      </header>
+
+      <div class="content" data-node-id="8268:2246">
+        <!-- Go Plus -->
+        <section class="subscribe" data-node-id="8268:2247">
+          <div class="subscribe__inner" data-node-id="8268:2248">
+            <div class="subscribe__row" data-node-id="8268:2249">
+              <span class="subscribe__icon" aria-hidden="true">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M5 16 3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1s.4-1 1-1h12c.6 0 1 .4 1 1z" />
+                </svg>
+              </span>
+              <div class="subscribe__body">
+                <div class="subscribe__text">
+                  <p class="subscribe__title">Go Plus</p>
+                  <p class="subscribe__subtitle">Speak → AI parse → Photo proof → SMS / WhatsApp / Email</p>
+                </div>
+                <a href="subscription.html" class="btn-upgrade">Upgrade</a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- List -->
+        <section class="list-card" data-node-id="8268:2257">
+          <a href="reports.html" class="list-row" style="text-decoration:none;color:inherit;display:flex">
+            <div class="list-row__inner" style="width:100%">
+              <div class="list-row__line">
+                <div class="list-row__title-wrap">
+                  <p class="list-row__title">Reports</p>
+                </div>
+                <div class="list-row__trail">
+                  <span class="list-row__chevron" aria-hidden="true">
+                    <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </a>
+          <div class="list-row" data-node-id="8268:2258">
+            <div class="list-row__inner list-row__inner--with-separator">
+              <div class="list-separator" data-name="_Separator"></div>
+              <div class="list-row__line">
+                <div class="list-row__title-wrap">
+                  <p class="list-row__title">About</p>
+                </div>
+                <div class="list-row__trail">
+                  <span class="list-row__chevron" aria-hidden="true">
+                    <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="list-row" data-node-id="8268:2259">
+            <div class="list-row__inner list-row__inner--with-separator">
+              <div class="list-separator" data-name="_Separator"></div>
+              <div class="list-row__line">
+                <div class="list-row__title-wrap">
+                  <p class="list-row__title">Feedback</p>
+                </div>
+                <div class="list-row__trail">
+                  <span class="list-row__chevron" aria-hidden="true">
+                    <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <footer class="bottom" data-node-id="8340:2260">
+        <p class="copyright" data-node-id="8340:2261">Copyright ©2026 CYBERAILABS</p>
+        <div class="home-indicator-wrap" data-node-id="9036:53325">
+          <div class="home-indicator" data-name="Home Indicator"></div>
+        </div>
+      </footer>
+    </main>
+  </div>
+    </div>
+  </div>
+</body>
+</html>

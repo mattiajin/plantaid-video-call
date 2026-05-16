@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>Invoices — Talkinvoice</title>
+  <!-- Brand: tokens.css --color-brand-*. PRD: voice-to-invoice (Invoice Maker POC). No hard-coded hex. -->
+  <!-- Shared: tokens.css + shell.css -->
+  <!-- Icons: class lucide icon-fill (filled SVG, currentColor). SF Symbols font not bundled for web. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <style>
+    /* Invoices screen — layout on top of device-screen + shell.css */
+
+    .inv-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .inv-toolbar-spacer {
+      width: 44px;
+      height: 44px;
+      margin: -6px 0;
+      flex-shrink: 0;
+    }
+
+    .inv-tool-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -6px 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: var(--radius-small);
+    }
+
+    .inv-large-title {
+      margin: 0 0 var(--layout-section-gap);
+      padding: 0 var(--margin-wide);
+      text-align: center;
+    }
+
+    /* Voice-first hero — primary action on Home */
+    .inv-voice-hero {
+      margin: 0 var(--margin-wide) var(--layout-section-gap);
+      padding: 20px var(--margin-regular) 24px;
+      border-radius: var(--radius-medium);
+      border: 1px solid var(--color-brand-base);
+      background: var(--color-brand-light);
+      text-align: center;
+    }
+
+    .inv-voice-hero__title {
+      margin: 0 0 8px;
+      font-size: var(--text-title1-size);
+      font-weight: var(--text-title1-weight);
+      line-height: var(--text-title1-line);
+      letter-spacing: var(--text-title1-track);
+      color: var(--color-text-primary);
+    }
+
+    .inv-voice-hero__sub {
+      margin: 0 0 18px;
+      font-size: var(--text-subhead-size);
+      font-weight: var(--text-subhead-weight);
+      line-height: var(--text-subhead-line);
+      letter-spacing: var(--text-subhead-track);
+      color: var(--color-text-secondary);
+    }
+
+    .inv-voice-hero__mic {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 88px;
+      height: 88px;
+      margin: 0 auto 12px;
+      padding: 0;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(22, 104, 217, 0.35);
+    }
+
+    .inv-voice-hero__mic .lucide {
+      width: 40px;
+      height: 40px;
+    }
+
+    .inv-voice-hero__mic:active {
+      opacity: 0.92;
+      transform: scale(0.98);
+    }
+
+    .inv-voice-hero__hint {
+      margin: 0;
+      font-size: var(--text-caption-size);
+      line-height: var(--text-caption-line);
+      letter-spacing: var(--text-caption-track);
+      color: var(--color-text-tertiary);
+    }
+
+    .inv-section-title {
+      margin: 0 0 12px;
+      padding: 0 var(--margin-wide);
+      font-size: var(--text-subhead-size);
+      font-weight: var(--text-subhead-em-weight);
+      line-height: var(--text-subhead-line);
+      letter-spacing: var(--text-subhead-track);
+      color: var(--color-text-secondary);
+    }
+
+    .inv-segment {
+      display: flex;
+      margin: 0 var(--margin-wide) 12px;
+      padding: 2px;
+      background: var(--color-bg-grouped);
+      border-radius: var(--radius-full);
+      box-shadow: inset 0 1px 0 rgba(14, 23, 42, 0.06);
+    }
+
+    .inv-segment__btn {
+      flex: 1;
+      min-width: 0;
+      padding: 6px 8px;
+      border: none;
+      border-radius: var(--radius-full);
+      background: transparent;
+      font-family: inherit;
+      font-size: var(--text-subhead-size);
+      font-weight: 500;
+      line-height: var(--text-subhead-line);
+      letter-spacing: var(--text-subhead-track);
+      color: var(--color-text-secondary);
+      cursor: pointer;
+    }
+
+    .inv-segment__btn[aria-selected="true"] {
+      background: var(--color-bg-card);
+      color: var(--color-brand-base);
+      box-shadow: 0 1px 3px rgba(14, 23, 42, 0.12), 0 1px 2px rgba(14, 23, 42, 0.06);
+    }
+
+    .inv-summary {
+      margin: 0 0 var(--layout-section-gap);
+      padding: 0 var(--margin-wide);
+      text-align: center;
+    }
+
+    .inv-summary p {
+      margin: 0;
+      font-size: var(--text-footnote-size);
+      font-weight: 400;
+      line-height: var(--text-footnote-line);
+      letter-spacing: var(--text-footnote-track);
+      color: var(--color-text-secondary);
+    }
+
+    .inv-summary p + p {
+      margin-top: 2px;
+    }
+
+    .inv-card {
+      margin: 0 var(--margin-wide) var(--layout-section-gap);
+      background: var(--color-bg-card);
+      border-radius: var(--radius-medium);
+      overflow: hidden;
+      box-shadow: 0 1px 0 rgba(14, 23, 42, 0.04);
+    }
+
+    .inv-row {
+      display: flex;
+      gap: 12px;
+      justify-content: space-between;
+      padding: 14px var(--margin-regular);
+    }
+
+    a.inv-row {
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+    }
+
+    a.inv-row:active {
+      opacity: 0.92;
+    }
+
+    .inv-row__left {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .inv-row__name {
+      margin: 0 0 4px;
+      font-size: var(--text-subhead-size);
+      font-weight: var(--text-subhead-weight);
+      line-height: var(--text-subhead-line);
+      letter-spacing: var(--text-subhead-track);
+      color: var(--color-text-secondary);
+    }
+
+    .inv-row__name--strong {
+      font-weight: var(--text-subhead-em-weight);
+      color: var(--color-text-primary);
+    }
+
+    .inv-row__meta {
+      margin: 0;
+      font-size: var(--text-caption-size);
+      line-height: var(--text-caption-line);
+      letter-spacing: var(--text-caption-track);
+      color: var(--color-text-tertiary);
+    }
+
+    .inv-row__right {
+      flex-shrink: 0;
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .inv-row__amount {
+      margin: 0;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      line-height: var(--text-body-line);
+      letter-spacing: var(--text-body-track);
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .inv-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: var(--text-caption2-size);
+      font-weight: 500;
+      line-height: var(--text-caption2-line);
+      letter-spacing: var(--text-caption2-track);
+      background: var(--color-success-bg);
+      color: var(--color-success-fg);
+    }
+
+    .inv-separator {
+      height: 1px;
+      margin: 0 var(--margin-regular);
+      background: var(--color-border-disabled);
+    }
+
+    .inv-footer {
+      flex-shrink: 0;
+      padding: 0 var(--margin-wide) max(8px, env(safe-area-inset-bottom, 0));
+      background: var(--color-bg-app);
+    }
+
+    .inv-create {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      margin: 0 0 8px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: var(--radius-small);
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+      font-family: inherit;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      line-height: var(--text-body-line);
+      letter-spacing: var(--text-body-track);
+      text-decoration: none;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+
+    .inv-create:active {
+      opacity: 0.92;
+    }
+
+    .inv-create--secondary {
+      background: var(--color-bg-card);
+      color: var(--color-brand-base);
+      border: 1px solid var(--color-brand-base);
+    }
+
+    .inv-tabbar {
+      display: flex;
+      align-items: stretch;
+      justify-content: space-around;
+      min-height: 49px;
+      margin-left: calc(-1 * var(--margin-wide));
+      margin-right: calc(-1 * var(--margin-wide));
+      width: calc(100% + 2 * var(--margin-wide));
+      padding: 6px 8px 4px;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid var(--color-border-disabled);
+    }
+
+    .inv-tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 6px 4px;
+      border: none;
+      background: transparent;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .inv-tab[aria-current="page"] {
+      color: var(--color-brand-base);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Onboarding">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Flow only · Invoices UI is in the phone frame.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <main class="device-screen inv-screen device-screen--col">
+          <div class="status-bar" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <div class="inv-scroll">
+            <nav class="screen-toolbar inv-toolbar" aria-label="Top actions">
+              <span class="inv-toolbar-spacer" aria-hidden="true"></span>
+              <a href="settings.html" class="inv-tool-btn" aria-label="Settings">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
+                </svg>
+              </a>
+            </nav>
+
+            <section class="inv-voice-hero" aria-labelledby="inv-voice-title">
+              <h1 class="inv-voice-hero__title" id="inv-voice-title">Speak your invoice</h1>
+              <p class="inv-voice-hero__sub">Hold the mic — AI parses the job, line items &amp; totals. Then add a photo and send.</p>
+              <a href="invoice-create.html" class="inv-voice-hero__mic" aria-label="Start voice invoice">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                </svg>
+              </a>
+              <p class="inv-voice-hero__hint">Primary path · opens the full voice → preview flow</p>
+            </section>
+
+            <h2 class="inv-section-title">Recent invoices</h2>
+
+            <div class="inv-segment" role="tablist" aria-label="Filter invoices">
+              <button type="button" class="inv-segment__btn" role="tab" aria-selected="true">All</button>
+              <button type="button" class="inv-segment__btn" role="tab" aria-selected="false">Unpaid</button>
+              <button type="button" class="inv-segment__btn" role="tab" aria-selected="false">Paid</button>
+            </div>
+
+            <div class="inv-summary">
+              <p>total: ¥420.00</p>
+              <p>received: ¥220.00</p>
+            </div>
+
+            <section class="inv-card" aria-label="Invoice list">
+              <a href="invoice-detail.html" class="inv-row">
+                <div class="inv-row__left">
+                  <p class="inv-row__name">Unknown client</p>
+                  <p class="inv-row__meta">#002, Mar 26</p>
+                </div>
+                <div class="inv-row__right">
+                  <p class="inv-row__amount">¥200.00</p>
+                </div>
+              </a>
+              <div class="inv-separator" aria-hidden="true"></div>
+              <a href="invoice-detail.html" class="inv-row">
+                <div class="inv-row__left">
+                  <p class="inv-row__name inv-row__name--strong">Bash</p>
+                  <p class="inv-row__meta">#001, Mar 16</p>
+                </div>
+                <div class="inv-row__right">
+                  <p class="inv-row__amount">¥220.00</p>
+                  <span class="inv-badge">Paid</span>
+                </div>
+              </a>
+            </section>
+          </div>
+
+          <footer class="inv-footer">
+            <a href="invoice-create.html" class="inv-create inv-create--secondary">Enter manually instead</a>
+            <nav class="inv-tabbar" aria-label="Main">
+              <a href="invoices.html" class="inv-tab" aria-current="page" aria-label="Invoices">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <rect x="2" y="6" width="14" height="18" rx="2" opacity="0.35" />
+                  <rect x="8" y="2" width="14" height="18" rx="2" />
+                </svg>
+              </a>
+              <a href="estimates.html" class="inv-tab" aria-label="Quotes">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+                </svg>
+              </a>
+              <a href="clients.html" class="inv-tab" aria-label="Clients">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M16 11c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 3-1.34 3-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                </svg>
+              </a>
+              <a href="settings.html" class="inv-tab" aria-label="Account">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />
+                </svg>
+              </a>
+            </nav>
+            <div class="home-indicator-wrap" aria-hidden="true">
+              <div class="home-indicator"></div>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

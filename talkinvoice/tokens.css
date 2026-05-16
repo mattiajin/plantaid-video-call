@@ -1,0 +1,291 @@
+/**
+ * Talkinvoice — shared design tokens (design-tokens.tokens.json)
+ * Colors: semantic.light + palette._blk alpha (hex8)
+ * Type: font.* iOS text styles → CSS variables
+ *
+ * PRD (Invoice Maker-20260309.docx + product brief) — four steps, English UI:
+ *  1 Speak: hold to dictate client, items, qty, rate (e.g. John Smith / 100 sq m × $2 / new sod $150)
+ *  2 AI: extract entities, match Contacts, line items + total
+ *  3 Photo: after job → attach or cover on invoice
+ *  4 Send: SMS / WhatsApp / Email; manual edits anytime
+ * HTML POC: no real ASR/AI/camera/send — layout + sample copy only.
+ * IA (static HTML): Home = invoices.html · index.html → redirect · settings.html = account ·
+ * subscription.html = Plans · create/detail = stack over Home · Work | Account in sidebar.
+ *
+ * Fonts: site-wide --font-sans. Apple: -apple-system / BlinkMacSystemFont → SF; named SF Pro*;
+ *        non-Apple: Inter → Segoe UI → system sans.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Token rules (pick hierarchy/scenario first, then variable; 6 buckets)
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * [1] Text — by importance
+ *     Title / primary copy   → --color-text-primary
+ *     Secondary labels       → --color-text-secondary
+ *     Meta / time / hints    → --color-text-tertiary
+ *     Disabled / placeholder → --color-text-disabled
+ *
+ * [2] Surfaces / borders — by block type
+ *     Full-screen base       → --color-bg-app
+ *     Cards / sheets         → --color-bg-card
+ *     Grouped / segmented bg → --color-bg-grouped
+ *     Hairline dividers      → --color-border-disabled
+ *     Card stroke            → --color-border-secondary
+ *
+ * [3] Brand — PRD: voice-to-invoice POC + field work / payment / trust (Invoice Maker)
+ *     Interactive / brand tint only; body $ amounts stay [1], not brand as body text.
+ *     Primary CTA, links, step chips, bottom tab selected → --color-brand-base (no surface-contrast as fake brand)
+ *     Banners, selected card weak fill, Go Plus blocks → --color-brand-light
+ *     Timeline spine, faint fills → --color-brand-muted
+ *     Success / paid → --color-success-bg + --color-success-fg (green = status, blue = action)
+ *
+ * [4] Type scale — match --text-* in :root
+ *     Nav bar title          → --text-nav-title-* + .nav-header__title
+ *     Screen H1              → .screen-heading → --text-title1-*
+ *     Optional 34px large    → .screen-heading--large → --text-large-title-*
+ *     Section titles         → --text-title3-*
+ *     Body / sub / foot       → --text-body-* / --text-subhead-* / --text-footnote-* or --text-caption-*
+ *
+ * [5] Icon size — by row
+ *     List row / CTA chevron → --icon-small (see svg rules at bottom)
+ *     Nav / toolbar / steps  → --icon-medium
+ *     Bottom tab             → --icon-tab
+ *     SVG: class lucide icon-fill, color currentColor
+ *
+ * [6] Space / radius
+ *     Screen horizontal inset → --margin-wide
+ *     List row inset          → --margin-regular
+ *     Section vertical gap    → --layout-section-gap
+ *     Status / nav bar height → --layout-status-bar-h / --layout-nav-bar-h (shell.css)
+ *     Cards / buttons / pills → --radius-medium / --radius-small / --radius-full
+ *
+ * shell.css: sidebar + device frame + status bar; toolbar row under status → .screen-toolbar.
+ * Legacy --comp-* / --functional-* are aliases; prefer --color-* / --color-brand-*.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+:root {
+  /* —— Semantic text (light) —— */
+  --color-text-primary: #0e172a;
+  --color-text-secondary: #0e172a80;
+  --color-text-disabled: #0e172a40;
+  /* Between secondary (α7) and disabled (α5) — list meta, hints */
+  --color-text-tertiary: #0e172a59;
+
+  /* —— Surfaces —— */
+  --color-bg-app: #f8f8f9;
+  --color-bg-card: #ffffff;
+  --color-bg-grouped: #ececee;
+  --color-border-secondary: #e7e8ea;
+  --color-border-disabled: #f3f3f4;
+
+  /* —— Brand (PRD: speech→invoice, trust + field payment; professional blue) —— */
+  --color-brand-base: #1668d9;
+  --color-brand-light: #e8f2fc;
+  /* Same hue as base (22,104,217) @ ~8% */
+  --color-brand-muted: rgba(22, 104, 217, 0.08);
+  --color-success-bg: #f9fdf8;
+  --color-success-fg: #2b5018;
+  --color-surface-contrast: #1c2435;
+  --surface-contrast: var(--color-surface-contrast);
+
+  --color-text-wt-primary: #ffffff;
+  --color-text-wt-secondary: rgba(255, 255, 255, 0.5);
+
+  /* Aliases used by existing pages */
+  --comp-bg-app: var(--color-bg-app);
+  --comp-bg-card: var(--color-bg-card);
+  --comp-text-blk-primary: var(--color-text-primary);
+  --comp-text-blk-secondary: var(--color-text-secondary);
+  --comp-text-blk-disabled: var(--color-text-disabled);
+  --comp-text-blk-tertiary: var(--color-text-tertiary);
+  --comp-border-secondary: var(--color-border-secondary);
+  --comp-border-disabled: var(--color-border-disabled);
+  --functional-brand-base: var(--color-brand-base);
+  --functional-brand-light: var(--color-brand-light);
+  --functional-success-light: var(--color-success-bg);
+  --functional-success-dark: var(--color-success-fg);
+  --functional-brand-muted: var(--color-brand-muted);
+  --comp-text-wt-primary: var(--color-text-wt-primary);
+  --comp-text-wt-secondary: var(--color-text-wt-secondary);
+
+  /* —— Layout numbers —— */
+  --radius-xsmall: 4px;
+  --radius-small: 8px;
+  --radius-medium: 16px;
+  --radius-large: 24px;
+  --radius-full: 999px;
+  --margin-regular: 16px;
+  --margin-wide: 20px;
+  /* iPhone 375 layout — Figma 8197:6434 Settings */
+  --layout-screen-w: 375px;
+  /* shell.css: .device-screen uses these as the fixed phone mock (375×812 px) */
+  --layout-screen-min-h: 812px;
+  --layout-status-bar-h: 44px;
+  /* System/Bars — Figma TalkInvoice 14002:3994 (Status bar - iPhone) */
+  --status-bar-bg: #f9f9f9;
+  --status-bar-asset-cellular: url("https://www.figma.com/api/mcp/asset/fd94344c-005f-481e-b825-2f9c21d5d075");
+  --status-bar-asset-wifi: url("https://www.figma.com/api/mcp/asset/a4ad3e3e-baa9-4a48-a163-e8eb0e601c1b");
+  --status-bar-asset-battery: url("https://www.figma.com/api/mcp/asset/1b3e10b0-9b26-498f-8d01-b3759c6ff387");
+  --layout-nav-bar-h: 54px;
+  /* First content block below nav + gap between major sections (Go Plus ↔ list) */
+  --layout-section-gap: 24px;
+  /* Grouped list row (About / Feedback) */
+  --layout-list-row-h: 56px;
+  --icon-small: 17px;
+  --icon-medium: 22px;
+  --icon-tab: 26px;
+
+  /* Status bar — time (iOS) */
+  --status-time-size: 17px;
+  --status-time-weight: 600;
+  --status-time-line: 22px;
+
+  /* —— Typography scale (SF Pro / Inter) —— */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+
+  /* Large Title emphasized */
+  --text-large-title-size: 34px;
+  --text-large-title-weight: 700;
+  --text-large-title-line: 41px;
+  --text-large-title-track: 0.4px;
+
+  /* Title 1 emphasized — some marketing headings */
+  --text-title1-size: 26px;
+  --text-title1-weight: 700;
+  --text-title1-line: 34px;
+  --text-title1-track: 0;
+
+  /* Title 3 emphasized — section */
+  --text-title3-size: 18px;
+  --text-title3-weight: 500;
+  --text-title3-line: 21.6px;
+  --text-title3-track: -0.4px;
+
+  /* Navigation bar title (iOS — ~17pt semibold) */
+  --text-nav-title-size: 17px;
+  --text-nav-title-weight: 600;
+  --text-nav-title-line: 22px;
+  --text-nav-title-track: -0.41px;
+
+  /* Body / emphasized */
+  --text-body-size: 16px;
+  --text-body-line: 20.8px;
+  --text-body-track: -0.43px;
+  --text-body-weight: 400;
+  --text-body-em-weight: 500;
+
+  /* Subheadline */
+  --text-subhead-size: 14px;
+  --text-subhead-line: 20px;
+  --text-subhead-track: -0.23px;
+  --text-subhead-weight: 400;
+  --text-subhead-em-weight: 600;
+
+  /* Footnote */
+  --text-footnote-size: 13px;
+  --text-footnote-line: 18px;
+  --text-footnote-track: -0.08px;
+
+  /* Caption 1 */
+  --text-caption-size: 12px;
+  --text-caption-line: 16px;
+  --text-caption-track: 0;
+
+  /* Caption 2 / tiny badge */
+  --text-caption2-size: 11px;
+  --text-caption2-line: 13px;
+  --text-caption2-track: 0.06px;
+
+  /* Footnote / button small (13/18) — Upgrade */
+  --text-subhead-btn-size: 13px;
+  --text-subhead-btn-line: 18px;
+  --text-subhead-btn-track: -0.08px;
+
+  --system-black: #000000;
+
+  /* Legacy aliases (pages already use these names) */
+  --ls-body-tight: -0.43px;
+  --ls-title3: -0.4px;
+  --ls-footnote: -0.08px;
+  --ls-subhead: -0.23px;
+}
+
+html {
+  font-family: var(--font-sans);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* Inline SVG — filled style (Material-style paths), color via currentColor */
+svg.icon-fill {
+  fill: currentColor;
+  stroke: none;
+  flex-shrink: 0;
+}
+
+/* Optional size utilities — add to `svg.lucide.icon-fill` when not covered by shell rules */
+.icon-l--sm {
+  width: var(--icon-small);
+  height: var(--icon-small);
+}
+
+.icon-l--md {
+  width: var(--icon-medium);
+  height: var(--icon-medium);
+}
+
+.icon-l--tab {
+  width: var(--icon-tab);
+  height: var(--icon-tab);
+}
+
+/* Screen main H1 — one rule: Title 1 (Invoices, Subscription, any future screen) */
+.screen-heading {
+  font-size: var(--text-title1-size);
+  font-weight: var(--text-title1-weight);
+  line-height: var(--text-title1-line);
+  letter-spacing: var(--text-title1-track);
+  color: var(--color-text-primary);
+}
+
+/* Optional: iOS-style 34px large title when explicitly needed */
+.screen-heading--large {
+  font-size: var(--text-large-title-size);
+  font-weight: var(--text-large-title-weight);
+  line-height: var(--text-large-title-line);
+  letter-spacing: var(--text-large-title-track);
+}
+
+/* —— Icon sizes: one rule per context (avoid per-page drift) —— */
+.nav-header .lucide.icon-fill,
+.screen-toolbar .lucide.icon-fill {
+  width: var(--icon-medium);
+  height: var(--icon-medium);
+}
+
+.inv-tab .lucide.icon-fill {
+  width: var(--icon-tab);
+  height: var(--icon-tab);
+}
+
+.list-row__chevron .lucide.icon-fill,
+.trial-cta .lucide.icon-fill {
+  width: var(--icon-small);
+  height: var(--icon-small);
+}
+
+.subscribe__icon .lucide.icon-fill,
+.trial-step__icon .lucide.icon-fill {
+  width: var(--icon-medium);
+  height: var(--icon-medium);
+}
+

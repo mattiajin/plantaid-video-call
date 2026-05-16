@@ -1,0 +1,341 @@
+/**
+ * Talkinvoice — shared app shell: desktop chrome, sidebar, 375×812 phone frame (fixed px — dev mock).
+ * .device-screen has fixed height + overflow:hidden; scroll lives in inner regions (e.g. .inv-scroll, .content).
+ * Keep .status-bar a direct child of .device-screen--col — not inside a *-scroll region — so time/signal icons stay fixed.
+ * Scrollbars are visually hidden (see “Hide scrollbars” below); scrolling still works.
+ * Link after tokens.css in every page.
+ */
+
+:root {
+  --shell-chrome-bg: #1a1a1a;
+  --sidebar-bg: #14161a;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-text: rgba(255, 255, 255, 0.92);
+  --sidebar-muted: rgba(255, 255, 255, 0.45);
+  /* Align with tokens --color-brand-base hue (22, 104, 217) */
+  --sidebar-active-bg: rgba(22, 104, 217, 0.2);
+  --sidebar-active-border: rgba(22, 104, 217, 0.5);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--shell-chrome-bg);
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+.app-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.sidebar {
+  display: none;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 240px;
+  padding: 20px 16px;
+  font-family: var(--font-sans);
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  color: var(--sidebar-text);
+}
+
+.sidebar__brand {
+  margin: 0 0 20px;
+  padding: 8px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.sidebar__nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar__link {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sidebar-muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.sidebar__link:hover {
+  color: var(--sidebar-text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sidebar__link[aria-current="page"] {
+  color: var(--sidebar-text);
+  background: var(--sidebar-active-bg);
+  border-color: var(--sidebar-active-border);
+}
+
+.sidebar__hint {
+  margin: 16px 12px 0;
+  font-size: var(--text-caption-size);
+  line-height: 1.45;
+  color: var(--sidebar-muted);
+}
+
+.sidebar__group-label {
+  margin: 14px 12px 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sidebar-muted);
+}
+
+.sidebar__nav--secondary {
+  margin-top: 0;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.device-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  background: var(--shell-chrome-bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+@media (min-width: 768px) {
+  .app-layout {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .sidebar {
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .app-main {
+    flex: 1;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .device-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: center;
+    padding: 24px 16px;
+  }
+}
+
+/* —— Phone mock frame: exact iPhone logical size, scroll inside —— */
+.device-screen {
+  position: relative;
+  width: 375px;
+  height: 812px;
+  flex-shrink: 0;
+  margin: 0 auto;
+  background: var(--color-bg-app);
+  font-family: var(--font-sans);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .device-screen {
+    border-radius: 12px;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 16px 48px rgba(0, 0, 0, 0.45);
+  }
+}
+
+.device-screen--clip {
+  overflow: hidden;
+}
+
+.device-screen--col {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Hide scrollbars (keep scroll: wheel / touch / trackpad) */
+.app-main,
+.device-screen,
+.device-screen * {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+
+.app-main::-webkit-scrollbar,
+.device-screen::-webkit-scrollbar,
+.device-screen *::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* —— Status bar — Figma node 14002:3994 System/Bars —— */
+.status-bar {
+  flex-shrink: 0;
+  box-sizing: border-box;
+  height: var(--layout-status-bar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 21px 24px 19px;
+  background: var(--status-bar-bg);
+}
+
+.status-bar--fixed {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 5;
+}
+
+/**
+ * Row under status bar — same metrics as Settings nav (54px, inset 20px).
+ * Use with: Subscription `.trial-nav`, Invoices `.inv-toolbar`.
+ */
+.screen-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: var(--layout-nav-bar-h);
+  padding: 0 var(--margin-wide);
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.status-bar__time {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 22px;
+  padding-top: 1.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+  font-size: var(--status-time-size);
+  font-weight: var(--status-time-weight);
+  line-height: var(--status-time-line);
+  letter-spacing: 0;
+  color: var(--system-black);
+}
+
+.status-bar__levels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  height: 22px;
+  padding-top: 1px;
+  padding-right: 1px;
+}
+
+/* Level icons — raster exports from Figma (tokens: --status-bar-asset-*) */
+.status-bar__icon {
+  display: block;
+  flex-shrink: 0;
+  background: transparent center / contain no-repeat;
+}
+
+.status-bar__icon--cellular {
+  width: 19.2px;
+  height: 12.226px;
+  background-image: var(--status-bar-asset-cellular);
+}
+
+.status-bar__icon--wifi {
+  width: 17.142px;
+  height: 12.328px;
+  background-image: var(--status-bar-asset-wifi);
+}
+
+.status-bar__icon--battery {
+  width: 27.328px;
+  height: 13px;
+  background-image: var(--status-bar-asset-battery);
+}
+
+/* Dark / tinted frames: light content on transparent bar */
+.device-screen--marketing-dark .status-bar,
+.trial-screen--paywall-dark .status-bar {
+  background: transparent;
+}
+
+.device-screen--marketing-dark .status-bar__time,
+.trial-screen--paywall-dark .status-bar__time {
+  color: var(--color-text-wt-primary);
+}
+
+.device-screen--marketing-dark .status-bar__icon,
+.trial-screen--paywall-dark .status-bar__icon {
+  filter: brightness(0) invert(1);
+}
+
+/* Warm pain frame — same status treatment as other dark marketing surfaces */
+.ob-pain-screen--compact .status-bar,
+.onb-pain .status-bar {
+  background: transparent;
+}
+
+.ob-pain-screen--compact .status-bar__time,
+.onb-pain .status-bar__time {
+  color: var(--color-text-wt-primary);
+}
+
+.ob-pain-screen--compact .status-bar__icon,
+.onb-pain .status-bar__icon {
+  filter: brightness(0) invert(1);
+}
+
+/* —— Home indicator (34pt strip) —— */
+.home-indicator-wrap {
+  position: relative;
+  width: 100%;
+  max-width: var(--layout-screen-w);
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.home-indicator {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  width: 144px;
+  height: 5px;
+  border-radius: 100px;
+  background: var(--system-black);
+}

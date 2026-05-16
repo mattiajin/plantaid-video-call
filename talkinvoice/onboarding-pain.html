@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#1a1512" />
+  <title>TalkInvoice — Pain points</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="onboarding-sequence.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Onboarding">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link" aria-current="page">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Warm dark · absolute layout · 3 × 172px pain items.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <!-- Pain screen — warm dark absolute-position layout -->
+        <main class="device-screen onb-pain">
+
+          <!-- Status bar (transparent, white icons) -->
+          <div class="status-bar status-bar--fixed" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <!-- Header: back + progress bar (22%) -->
+          <div class="onb-pain__header">
+            <a href="onboarding-voice-core.html" class="ob-flow-back" aria-label="Back">
+              <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M10 2L2 10L10 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <div class="ob-flow-progress" aria-hidden="true">
+              <div class="ob-flow-progress__fill" style="width: 22%"></div>
+            </div>
+          </div>
+
+          <!-- Title block (top: 92px, height: 88px) -->
+          <div class="onb-pain__title">
+            <h1 class="onb-pain__heading">Say goodbye to these<br>invoicing headaches:</h1>
+            <hr class="onb-pain__rule" />
+          </div>
+
+          <!-- Pain list: 3 × 172px absolute items (top: 180px → 696px) -->
+          <div class="onb-pain__list" role="list" aria-label="Pain points">
+
+            <!-- Item 1: top 0 (absolute 180px from screen top) -->
+            <div class="onb-pain__item" role="listitem" aria-labelledby="pain-1">
+              <div class="onb-pain__icon" aria-hidden="true">
+                <!-- Clock: time wasted on paperwork -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M12 8v4.5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <h2 id="pain-1">Hours lost to paperwork</h2>
+              <p>After the job you're still building quotes, line items, and PDFs—often from the van.</p>
+            </div>
+
+            <!-- Item 2: top 172px -->
+            <div class="onb-pain__item" role="listitem" aria-labelledby="pain-2">
+              <div class="onb-pain__icon" aria-hidden="true">
+                <!-- Percent: tax & rates headache -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <circle cx="8" cy="8" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="16" cy="16" r="2.5" stroke="currentColor" stroke-width="1.6"/>
+                  <line x1="5" y1="19" x2="19" y2="5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <h2 id="pain-2">Tax, rates &amp; mental math</h2>
+              <p>Discounts, tax rules, rounding—hard when you're tired and the customer is still there.</p>
+            </div>
+
+            <!-- Item 3: top 344px -->
+            <div class="onb-pain__item" role="listitem" aria-labelledby="pain-3">
+              <div class="onb-pain__icon" aria-hidden="true">
+                <!-- Wallet: waiting for payment -->
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <rect x="2" y="6" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.6"/>
+                  <path d="M2 11h20" stroke="currentColor" stroke-width="1.6"/>
+                  <circle cx="17" cy="16" r="1.2" fill="currentColor"/>
+                </svg>
+              </div>
+              <h2 id="pain-3">Waiting to get paid</h2>
+              <p>Late or messy invoices mean slower cash flow—chasing payments instead of the next job.</p>
+            </div>
+
+          </div>
+
+          <!-- Footer: Continue CTA + home indicator -->
+          <div class="onb-pain__footer">
+            <a href="onboarding-highlight-paid.html" class="onb-pain__cta">Continue</a>
+            <div class="home-indicator-wrap" aria-hidden="true">
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

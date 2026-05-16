@@ -1,0 +1,10 @@
+.cursor/
+
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+__pycache__/
+*.pyc
+.env
+.env.*

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>TalkInvoice — Invoice in seconds</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="onboarding-sequence.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Flow">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link" aria-current="page">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Landing · optimised: new tagline + trade signal.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <!-- Landing screen — Figma node 14002:3981 "Landing" -->
+        <main class="device-screen onb-landing" data-node-id="14002:3981" data-name="Landing">
+
+          <!-- Status bar floats over media (z-index 5, white bg) -->
+          <div class="status-bar status-bar--fixed" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <!-- Full-bleed video / media area (top 0 → 479px) -->
+          <div class="onb-landing__media" data-node-id="14002:3986" data-name="Media Container" aria-hidden="true" role="img" aria-label="Video: trades at work — placeholder"></div>
+
+          <!-- VOICE AI badge (top: 489px, 10px below media edge) -->
+          <div class="onb-landing__badge" data-node-id="14002:4230" data-name="Btn" aria-hidden="true">
+            <span class="onb-landing__badge-label">VOICE AI</span>
+            <span class="onb-landing__badge-star">✦</span>
+          </div>
+
+          <!-- Title section (top: 529px): app name + logo + tagline + trade signal -->
+          <div class="onb-landing__title" data-node-id="14002:3983" data-name="Title">
+            <div class="onb-landing__name-row" data-node-id="14002:4210">
+              <h1 class="onb-landing__app-name" data-node-id="14002:3984">TalkInvoice</h1>
+              <!-- App logo: brand blue rounded square with sonar/voice rings -->
+              <div class="onb-landing__app-logo" data-node-id="14002:4201" data-name="App Logo" aria-hidden="true">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="40" height="40" rx="8" fill="var(--color-brand-base)" />
+                  <circle cx="20" cy="20" r="14.8" stroke="rgba(255,255,255,0.18)" stroke-width="1.4" />
+                  <circle cx="20" cy="20" r="11.2" stroke="rgba(255,255,255,0.28)" stroke-width="1.4" />
+                  <circle cx="20" cy="20" r="7.4" stroke="rgba(255,255,255,0.45)" stroke-width="1.4" />
+                  <circle cx="20" cy="20" r="3.6" fill="white" />
+                </svg>
+              </div>
+            </div>
+            <p class="onb-landing__tagline" data-node-id="14002:3985">Invoice in seconds.<br>Just speak.</p>
+            <p class="onb-landing__trades" aria-hidden="true">Electrical · Plumbing · HVAC · Landscaping</p>
+          </div>
+
+          <!-- Footer: CTA + legal + home indicator -->
+          <div class="onb-landing__footer" data-node-id="14002:3987" data-name="Button Container">
+            <a href="onboarding-voice-core.html" class="onb-landing__cta" data-node-id="14002:3988" data-name="Btn">Start</a>
+            <div class="onb-landing__bottom" data-node-id="14002:3989" data-name="Bottom Button">
+              <div class="onb-landing__legal" data-node-id="14002:3991" data-name="terms">
+                <a href="#" class="onb-landing__legal-link">Privacy Policy</a>
+                <span class="onb-landing__legal-sep">  |  </span>
+                <a href="#" class="onb-landing__legal-link">Terms of Service</a>
+              </div>
+              <div class="home-indicator-wrap" aria-hidden="true" data-node-id="14002:3993">
+                <div class="home-indicator"></div>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

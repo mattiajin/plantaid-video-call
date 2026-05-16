@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>John Smith — Preview — Talkinvoice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <style>
+    .id-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 var(--margin-wide) 24px;
+    }
+
+    .id-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -6px 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      border-radius: var(--radius-small);
+    }
+
+    .id-back .lucide {
+      width: var(--icon-medium);
+      height: var(--icon-medium);
+    }
+
+    .id-title {
+      margin: 0 0 8px;
+      text-align: center;
+    }
+
+    .id-sub {
+      margin: 0 0 var(--layout-section-gap);
+      text-align: center;
+      font-size: var(--text-footnote-size);
+      line-height: var(--text-footnote-line);
+      color: var(--color-text-secondary);
+    }
+
+    .id-card {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-medium);
+      padding: 14px var(--margin-regular);
+      margin-bottom: 12px;
+      box-shadow: 0 1px 0 rgba(14, 23, 42, 0.04);
+    }
+
+    .id-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--color-border-disabled);
+    }
+
+    .id-row:last-child {
+      border-bottom: none;
+    }
+
+    .id-k {
+      font-size: var(--text-subhead-size);
+      color: var(--color-text-secondary);
+    }
+
+    .id-v {
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      color: var(--color-text-primary);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .id-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-caption-size);
+    }
+
+    .id-table th,
+    .id-table td {
+      padding: 8px 4px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border-disabled);
+    }
+
+    .id-table th {
+      color: var(--color-text-tertiary);
+      font-weight: 500;
+    }
+
+    .id-table tfoot td {
+      border-bottom: none;
+      font-weight: 600;
+      font-size: var(--text-subhead-size);
+    }
+
+    .id-thumb {
+      width: 100%;
+      max-height: 160px;
+      object-fit: cover;
+      border-radius: var(--radius-small);
+      background: var(--color-bg-grouped);
+    }
+
+    .id-cap {
+      margin: 8px 0 0;
+      font-size: var(--text-caption-size);
+      color: var(--color-text-tertiary);
+      text-align: center;
+    }
+
+    .id-footer {
+      flex-shrink: 0;
+      padding: 0 var(--margin-wide) max(8px, env(safe-area-inset-bottom, 0));
+      background: var(--color-bg-app);
+    }
+
+    .id-send {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .id-send__btn {
+      flex: 1;
+      min-height: 48px;
+      padding: 10px 6px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--radius-small);
+      background: var(--color-bg-card);
+      font-family: inherit;
+      font-size: var(--text-caption-size);
+      font-weight: 600;
+      color: var(--color-text-primary);
+    }
+
+    .id-send__btn:disabled {
+      opacity: 0.65;
+    }
+
+    .id-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .id-btn {
+      flex: 1;
+      min-height: 48px;
+      padding: 12px 16px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--radius-small);
+      background: var(--color-bg-card);
+      font-family: inherit;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      color: var(--color-text-primary);
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .id-btn--primary {
+      border-color: transparent;
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Onboarding">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Flow only · app UI in the phone frame.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <main class="device-screen device-screen--col">
+          <div class="status-bar" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <nav class="screen-toolbar" aria-label="Top actions">
+            <a href="invoices.html" class="id-back" aria-label="Back to list">
+              <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
+            </a>
+            <span style="flex:1;text-align:center;margin:0;font-size:var(--text-nav-title-size);font-weight:var(--text-nav-title-weight);">Preview</span>
+            <span style="width:44px" aria-hidden="true"></span>
+          </nav>
+
+          <div class="id-scroll">
+            <h1 class="screen-heading id-title">John Smith</h1>
+            <p class="id-sub">Draft · from voice · Mar 26, 2026</p>
+
+            <section class="id-card" aria-label="Totals and status">
+              <div class="id-row">
+                <span class="id-k">Total</span>
+                <span class="id-v">$350.00</span>
+              </div>
+              <div class="id-row">
+                <span class="id-k">Status</span>
+                <span class="id-v">Ready to send</span>
+              </div>
+            </section>
+
+            <section class="id-card" aria-label="Line items">
+              <table class="id-table">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mowing</td>
+                    <td>100 sq m</td>
+                    <td>$2</td>
+                    <td>$200</td>
+                  </tr>
+                  <tr>
+                    <td>New sod</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>$150</td>
+                  </tr>
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="3">Total</td>
+                    <td>$350</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </section>
+
+            <section class="id-card" aria-label="Job photo">
+              <div class="id-k" style="margin-bottom:8px;">Attachment / cover (AI placed)</div>
+              <img class="id-thumb" src="reference-invoices.png" alt="After photo placeholder" width="335" height="160" />
+              <p class="id-cap">POC placeholder · production uses your job-site photo.</p>
+            </section>
+          </div>
+
+          <footer class="id-footer">
+            <div class="id-send" role="group" aria-label="Send channels">
+              <button type="button" class="id-send__btn" disabled>SMS</button>
+              <button type="button" class="id-send__btn" disabled>WhatsApp</button>
+              <button type="button" class="id-send__btn" disabled>Email</button>
+            </div>
+            <div class="id-actions">
+              <a href="invoice-create.html" class="id-btn">Back to edit</a>
+              <button type="button" class="id-btn id-btn--primary" disabled aria-disabled="true">Send</button>
+            </div>
+            <div class="home-indicator-wrap" aria-hidden="true">
+              <div class="home-indicator"></div>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

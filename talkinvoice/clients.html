@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>Clients — Talkinvoice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <style>
+    .hub-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0 var(--margin-wide) 24px;
+    }
+
+    .hub-p {
+      margin: 0;
+      font-size: var(--text-body-size);
+      line-height: var(--text-body-line);
+      color: var(--color-text-secondary);
+    }
+
+    .hub-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -6px 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      border-radius: var(--radius-small);
+    }
+
+    .hub-back .lucide {
+      width: var(--icon-medium);
+      height: var(--icon-medium);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Onboarding">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Flow only · app UI in the phone frame.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <main class="device-screen device-screen--col">
+          <div class="status-bar" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+          <nav class="screen-toolbar" aria-label="Top actions">
+            <a href="invoices.html" class="hub-back" aria-label="Back to invoices">
+              <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
+            </a>
+            <span style="flex:1;text-align:center;margin:0;font-size:var(--text-nav-title-size);font-weight:var(--text-nav-title-weight);">Clients</span>
+            <span style="width:44px" aria-hidden="true"></span>
+          </nav>
+          <div class="hub-scroll">
+            <h1 class="screen-heading" style="margin:0 0 var(--layout-section-gap);text-align:center;">Clients</h1>
+            <p class="hub-p">Placeholder: client names you can pick when reviewing voice transcripts before sending invoices.</p>
+          </div>
+          <div class="home-indicator-wrap" aria-hidden="true">
+            <div class="home-indicator"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

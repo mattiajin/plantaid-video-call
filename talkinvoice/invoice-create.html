@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>New invoice — Talkinvoice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <style>
+    .ix-screen .inv-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 var(--margin-wide) 24px;
+    }
+
+    .ix-back {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      margin: -6px 0;
+      padding: 0;
+      border: none;
+      background: transparent;
+      color: var(--color-text-primary);
+      text-decoration: none;
+      border-radius: var(--radius-small);
+    }
+
+    .ix-back .lucide {
+      width: var(--icon-medium);
+      height: var(--icon-medium);
+    }
+
+    .ix-title {
+      margin: 0 0 8px;
+      text-align: center;
+    }
+
+    .ix-lead {
+      margin: 0 0 var(--layout-section-gap);
+      font-size: var(--text-footnote-size);
+      line-height: var(--text-footnote-line);
+      color: var(--color-text-secondary);
+      text-align: center;
+    }
+
+    .flow-step {
+      margin-bottom: calc(var(--layout-section-gap) + 8px);
+    }
+
+    .flow-step__head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .flow-step__num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: var(--radius-full);
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+      font-size: var(--text-caption-size);
+      font-weight: 600;
+      line-height: 28px;
+      text-align: center;
+    }
+
+    .flow-step__title {
+      margin: 0;
+      font-size: var(--text-title3-size);
+      font-weight: var(--text-title3-weight);
+      line-height: var(--text-title3-line);
+      letter-spacing: var(--text-title3-track);
+      color: var(--color-text-primary);
+    }
+
+    .flow-step__body {
+      font-size: var(--text-footnote-size);
+      line-height: 1.5;
+      color: var(--color-text-secondary);
+      margin: 0 0 12px;
+    }
+
+    .ix-example {
+      margin: 0 0 12px;
+      padding: 12px 14px;
+      border-left: 3px solid var(--color-brand-base);
+      border-radius: 0 var(--radius-small) var(--radius-small) 0;
+      background: var(--color-bg-card);
+      font-size: var(--text-subhead-size);
+      line-height: 1.45;
+      color: var(--color-text-primary);
+    }
+
+    .ix-voice {
+      padding: 16px;
+      border-radius: var(--radius-medium);
+      border: 1px solid var(--color-brand-base);
+      background: var(--color-brand-light);
+    }
+
+    .ix-voice__row {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ix-voice__mic {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 72px;
+      height: 72px;
+      padding: 0;
+      border: none;
+      border-radius: var(--radius-full);
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+      cursor: pointer;
+    }
+
+    .ix-voice__mic .lucide {
+      width: 32px;
+      height: 32px;
+    }
+
+    .ix-voice__cap {
+      margin: 0;
+      font-size: var(--text-caption-size);
+      line-height: var(--text-caption-line);
+      text-align: center;
+      color: var(--color-text-secondary);
+    }
+
+    .ix-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .ix-label {
+      font-size: var(--text-subhead-size);
+      font-weight: var(--text-subhead-em-weight);
+      line-height: var(--text-subhead-line);
+      letter-spacing: var(--text-subhead-track);
+      color: var(--color-text-secondary);
+    }
+
+    .ix-input,
+    .ix-textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--radius-small);
+      background: var(--color-bg-card);
+      font-family: inherit;
+      font-size: var(--text-body-size);
+      line-height: var(--text-body-line);
+      color: var(--color-text-primary);
+    }
+
+    .ix-textarea {
+      min-height: 72px;
+      resize: vertical;
+    }
+
+    .ix-parse {
+      background: var(--color-bg-card);
+      border-radius: var(--radius-medium);
+      padding: 12px var(--margin-regular);
+      border: 1px solid var(--color-border-secondary);
+    }
+
+    .ix-parse__client {
+      margin: 0 0 12px;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      color: var(--color-text-primary);
+    }
+
+    .ix-parse__tag {
+      display: inline-block;
+      margin-left: 8px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-size: var(--text-caption2-size);
+      font-weight: 500;
+      background: var(--color-brand-muted);
+      color: var(--color-brand-base);
+      vertical-align: middle;
+    }
+
+    .ix-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--text-caption-size);
+    }
+
+    .ix-table th,
+    .ix-table td {
+      padding: 8px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border-disabled);
+    }
+
+    .ix-table th {
+      color: var(--color-text-tertiary);
+      font-weight: 500;
+    }
+
+    .ix-table td {
+      color: var(--color-text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ix-table tfoot td {
+      border-bottom: none;
+      font-weight: var(--text-body-em-weight);
+      font-size: var(--text-body-size);
+    }
+
+    .ix-photo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+      padding: 16px;
+      border: 2px dashed var(--color-border-secondary);
+      border-radius: var(--radius-medium);
+      background: var(--color-bg-card);
+      color: var(--color-text-secondary);
+      text-align: center;
+      cursor: default;
+    }
+
+    .ix-photo__icon .lucide {
+      width: var(--icon-medium);
+      height: var(--icon-medium);
+      margin-bottom: 8px;
+      color: var(--color-brand-base);
+    }
+
+    .ix-photo__cap {
+      margin: 0;
+      font-size: var(--text-footnote-size);
+      line-height: var(--text-footnote-line);
+    }
+
+    .ix-send {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .ix-send__btn {
+      flex: 1;
+      min-width: 96px;
+      min-height: 44px;
+      padding: 10px 8px;
+      border: 1px solid var(--color-border-secondary);
+      border-radius: var(--radius-small);
+      background: var(--color-bg-card);
+      font-family: inherit;
+      font-size: var(--text-caption-size);
+      font-weight: 600;
+      color: var(--color-text-primary);
+      cursor: default;
+    }
+
+    .ix-send__btn:disabled {
+      opacity: 0.65;
+    }
+
+    .ix-manual {
+      margin-top: 8px;
+      padding-top: var(--layout-section-gap);
+      border-top: 1px solid var(--color-border-disabled);
+    }
+
+    .ix-manual__title {
+      margin: 0 0 10px;
+      font-size: var(--text-subhead-size);
+      font-weight: var(--text-subhead-em-weight);
+      color: var(--color-text-secondary);
+    }
+
+    .ix-footer {
+      flex-shrink: 0;
+      padding: 0 var(--margin-wide) max(8px, env(safe-area-inset-bottom, 0));
+      background: var(--color-bg-app);
+    }
+
+    .ix-save {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 50px;
+      margin: 0 0 8px;
+      padding: 12px 16px;
+      border: none;
+      border-radius: var(--radius-small);
+      background: var(--color-brand-base);
+      color: var(--color-text-wt-primary);
+      font-family: inherit;
+      font-size: var(--text-body-size);
+      font-weight: var(--text-body-em-weight);
+      line-height: var(--text-body-line);
+      text-decoration: none;
+      cursor: pointer;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Onboarding">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Flow only · app UI in the phone frame.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <main class="device-screen ix-screen device-screen--col">
+          <div class="status-bar" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <nav class="screen-toolbar inv-toolbar" aria-label="Top actions">
+            <a href="invoices.html" class="ix-back" aria-label="Back to list">
+              <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+              </svg>
+            </a>
+            <span class="nav-header__title" style="flex:1;text-align:center;margin:0;font-size:var(--text-nav-title-size);font-weight:var(--text-nav-title-weight);">New</span>
+            <span style="width:44px" aria-hidden="true"></span>
+          </nav>
+
+          <div class="inv-scroll">
+            <h1 class="screen-heading ix-title">New invoice</h1>
+            <p class="ix-lead">Speak → AI line items → job photo → send to client. POC: no live mic / AI / camera.</p>
+
+            <!-- Step 1 -->
+            <section class="flow-step" aria-labelledby="s1">
+              <div class="flow-step__head">
+                <span class="flow-step__num" aria-hidden="true">1</span>
+                <h2 class="flow-step__title" id="s1">Describe the job</h2>
+              </div>
+              <p class="flow-step__body">Hold the mic and say the whole job in one go. For example:</p>
+              <blockquote class="ix-example">Did a lawn job for John Smith, about 100 square meters at two bucks per square meter; also new sod for one fifty.</blockquote>
+              <div class="ix-voice">
+                <div class="ix-voice__row">
+                  <button type="button" class="ix-voice__mic" aria-label="Hold to record (POC)">
+                    <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                    </svg>
+                  </button>
+                  <p class="ix-voice__cap">Hold to talk · release to stop (production uses on-device speech)</p>
+                </div>
+              </div>
+              <div class="ix-field" style="margin-top:12px">
+                <label class="ix-label" for="ix-transcript">Transcript (from ASR)</label>
+                <textarea id="ix-transcript" class="ix-textarea" rows="3">Did a lawn job for John Smith, about 100 square meters at two bucks per square meter; also new sod for one fifty.</textarea>
+              </div>
+            </section>
+
+            <!-- Step 2 -->
+            <section class="flow-step" aria-labelledby="s2">
+              <div class="flow-step__head">
+                <span class="flow-step__num" aria-hidden="true">2</span>
+                <h2 class="flow-step__title" id="s2">AI parsing</h2>
+              </div>
+              <p class="flow-step__body">Entities extracted and structured (editable).</p>
+              <div class="ix-parse">
+                <p class="ix-parse__client">Client: John Smith <span class="ix-parse__tag">Matched Contacts</span></p>
+                <table class="ix-table">
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Qty</th>
+                      <th>Unit</th>
+                      <th>Price</th>
+                      <th>Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>A · Mowing</td>
+                      <td>100</td>
+                      <td>sq m</td>
+                      <td>$2</td>
+                      <td>$200</td>
+                    </tr>
+                    <tr>
+                      <td>B · New sod</td>
+                      <td>—</td>
+                      <td>—</td>
+                      <td>—</td>
+                      <td>$150</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="4">Total</td>
+                      <td>$350</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </section>
+
+            <!-- Step 3 -->
+            <section class="flow-step" aria-labelledby="s3">
+              <div class="flow-step__head">
+                <span class="flow-step__num" aria-hidden="true">3</span>
+                <h2 class="flow-step__title" id="s3">Photo proof</h2>
+              </div>
+              <p class="flow-step__body">Take an after photo on site; AI attaches it or sets it as the invoice cover.</p>
+              <div class="ix-photo" role="button" tabindex="0" aria-label="Add photo (POC)">
+                <span class="ix-photo__icon" aria-hidden="true">
+                  <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+                  </svg>
+                </span>
+                <p class="ix-photo__cap">Tap to open the camera · preview on the next screen</p>
+              </div>
+            </section>
+
+            <!-- Step 4 -->
+            <section class="flow-step" aria-labelledby="s4">
+              <div class="flow-step__head">
+                <span class="flow-step__num" aria-hidden="true">4</span>
+                <h2 class="flow-step__title" id="s4">Send in one tap</h2>
+              </div>
+              <p class="flow-step__body">When it looks right, send by SMS, WhatsApp, or email.</p>
+              <div class="ix-send">
+                <button type="button" class="ix-send__btn" disabled>SMS</button>
+                <button type="button" class="ix-send__btn" disabled>WhatsApp</button>
+                <button type="button" class="ix-send__btn" disabled>Email</button>
+              </div>
+            </section>
+
+            <!-- Manual -->
+            <section class="ix-manual" aria-labelledby="sm">
+              <h3 class="ix-manual__title" id="sm">Edit manually</h3>
+              <div class="ix-field">
+                <label class="ix-label" for="ix-client">Client</label>
+                <input id="ix-client" class="ix-input" type="text" value="John Smith" autocomplete="name" />
+              </div>
+              <div class="ix-field">
+                <label class="ix-label" for="ix-note">Notes</label>
+                <textarea id="ix-note" class="ix-textarea" rows="2" placeholder="Adjust line items, tax…"></textarea>
+              </div>
+            </section>
+          </div>
+
+          <footer class="ix-footer">
+            <a href="invoice-detail.html" class="ix-save">Preview &amp; confirm</a>
+            <div class="home-indicator-wrap" aria-hidden="true">
+              <div class="home-indicator"></div>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

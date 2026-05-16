@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#1668D9" />
+  <title>Talkinvoice — Industry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="onboarding-flow.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Flow">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link" aria-current="page">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Industry pick · Continue → AHA.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <main class="device-screen ob-flow-screen device-screen--col">
+          <div class="status-bar" data-node-id="14002:3994" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <header class="ob-flow-header">
+            <div class="ob-flow-header-row">
+              <a href="onboarding-business.html" class="ob-flow-back" aria-label="Back">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+                </svg>
+              </a>
+              <div class="ob-flow-progress" aria-hidden="true">
+                <div class="ob-flow-progress__fill" style="width: 56%"></div>
+              </div>
+            </div>
+          </header>
+
+          <div class="ob-flow-scroll">
+            <figure class="ob-flow-hero">
+              <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&amp;fit=crop&amp;w=900&amp;q=80" alt="" width="375" height="168" />
+            </figure>
+
+            <div class="ob-flow-panel" style="padding-top: 16px;">
+              <h1 class="ob-flow-title">Industry</h1>
+              <p class="ob-flow-lead">Please select the industry you work in to personalize your app experience</p>
+
+              <div class="ob-search">
+                <svg class="lucide icon-fill" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+                </svg>
+                <input type="search" id="ind-search" placeholder="Search industry" aria-label="Search industry" autocomplete="off" />
+              </div>
+
+              <ul class="ob-option-list" role="listbox" aria-label="Industries">
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Carpentry</span>
+                    <input type="radio" name="industry" value="carpentry" class="ob-sr-only" checked />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Cleaning</span>
+                    <input type="radio" name="industry" value="cleaning" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Decking</span>
+                    <input type="radio" name="industry" value="decking" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Digital Freelancer</span>
+                    <input type="radio" name="industry" value="digital" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Drywall</span>
+                    <input type="radio" name="industry" value="drywall" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Electrical</span>
+                    <input type="radio" name="industry" value="electrical" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Landscaping</span>
+                    <input type="radio" name="industry" value="landscaping" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+                <li data-industry-row>
+                  <label class="ob-option-row">
+                    <span>Plumbing</span>
+                    <input type="radio" name="industry" value="plumbing" class="ob-sr-only" />
+                    <span class="ob-radio" aria-hidden="true"></span>
+                  </label>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <footer class="ob-flow-footer">
+            <a href="onboarding-estimates.html" class="ob-flow-cta">Continue</a>
+            <div class="home-indicator-wrap" aria-hidden="true">
+              <div class="home-indicator"></div>
+            </div>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      var input = document.getElementById("ind-search");
+      if (!input) return;
+      input.addEventListener("input", function () {
+        var q = input.value.trim().toLowerCase();
+        document.querySelectorAll("[data-industry-row]").forEach(function (row) {
+          var text = row.textContent.toLowerCase();
+          row.hidden = q.length > 0 && text.indexOf(q) === -1;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

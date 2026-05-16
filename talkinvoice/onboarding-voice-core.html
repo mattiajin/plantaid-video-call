@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#f8f8f9" />
+  <title>TalkInvoice — Invoice by speaking</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="tokens.css" />
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="onboarding-sequence.css" />
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar" aria-label="Flow">
+      <p class="sidebar__brand">Talkinvoice</p>
+      <p class="sidebar__group-label">Onboarding</p>
+      <nav class="sidebar__nav" aria-label="Onboarding">
+        <a href="onboarding.html" class="sidebar__link">1 Home</a>
+        <a href="onboarding-voice-core.html" class="sidebar__link" aria-current="page">2 Voice</a>
+        <a href="onboarding-pain.html" class="sidebar__link">3 Pain</a>
+        <a href="onboarding-highlight-paid.html" class="sidebar__link">4 Value</a>
+        <a href="onboarding-business.html" class="sidebar__link">5 Company</a>
+        <a href="onboarding-industry.html" class="sidebar__link">6 Industry</a>
+        <a href="onboarding-estimates.html" class="sidebar__link">7 AHA</a>
+        <a href="onboarding-account-loading.html" class="sidebar__link">8 Account</a>
+        <a href="onboarding-trial-anim.html" class="sidebar__link">9 Trial</a>
+        <a href="subscription.html" class="sidebar__link">Paywall</a>
+      </nav>
+      <p class="sidebar__hint">Figma 14002:3998 · absolute-position pattern.</p>
+    </aside>
+    <div class="app-main">
+      <div class="device-shell">
+        <!-- Voice Core screen — Figma node 14002:3998 "Intro" -->
+        <main class="device-screen onb-voice" data-node-id="14002:3998" data-name="Intro">
+
+          <!-- Status bar (regular light, floats over media) -->
+          <div class="status-bar status-bar--fixed" data-node-id="14002:4010" data-name="System/Bars" aria-hidden="true">
+            <div class="status-bar__time">9:41</div>
+            <div class="status-bar__levels">
+              <span class="status-bar__icon status-bar__icon--cellular"></span>
+              <span class="status-bar__icon status-bar__icon--wifi"></span>
+              <span class="status-bar__icon status-bar__icon--battery"></span>
+            </div>
+          </div>
+
+          <!-- Full-bleed video / media area (0 → 504px) -->
+          <div class="onb-voice__media" data-node-id="14002:4008" data-name="Media Placeholder" role="img" aria-label="Video: invoice by speaking demo — placeholder" aria-hidden="true"></div>
+
+          <!-- Navigation header: back + skip (top: 44px) -->
+          <div class="onb-voice__header" data-node-id="14002:4009" data-name="Header">
+            <a href="onboarding.html" class="onb-voice__back" aria-label="Back">
+              <svg width="12" height="20" viewBox="0 0 12 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M10 2L2 10L10 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+            <div class="ob-flow-progress" aria-hidden="true">
+              <div class="ob-flow-progress__fill" style="width: 11%"></div>
+            </div>
+            <a href="subscription.html" class="onb-voice__skip">Skip</a>
+          </div>
+
+          <!-- Title section (top: 504px): headline + subtitle -->
+          <div class="onb-voice__title" data-node-id="14002:4005" data-name="Title">
+            <h1 class="onb-voice__heading" data-node-id="14002:4006">Invoice by<br>speaking.</h1>
+            <p class="onb-voice__sub" data-node-id="14002:4007">Say it once — get a professional invoice in seconds. No forms, no friction.</p>
+          </div>
+
+          <!-- Footer: Continue CTA + home indicator -->
+          <div class="onb-voice__footer" data-node-id="14002:3999" data-name="Bottom Section">
+            <a href="onboarding-pain.html" class="onb-voice__cta" data-node-id="14002:4002">Continue</a>
+            <div class="home-indicator-wrap" aria-hidden="true" data-node-id="14002:4003">
+              <div class="home-indicator"></div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

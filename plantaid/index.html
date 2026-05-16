@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlantAID — My Garden</title>
+  <!-- Typography: Georgia is the brand serif (ships with macOS/iOS/Windows). It is not on Google Fonts.
+       Merriweather is downloaded from Google Fonts (gstatic) under SIL OFL — see fonts/merriweather/OFL.txt. -->
+  <style>
+    @font-face {
+      font-family: "Rco";
+      src: url("fonts/Rco.ttf") format("truetype");
+      font-weight: normal;
+      font-style: normal;
+      font-display: block;
+    }
+
+    /* Merriweather — Google Fonts, latin subset only (self-hosted woff2 from fonts.gstatic.com) */
+    @font-face {
+      font-family: "Merriweather";
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      src: url("fonts/merriweather/merriweather-latin-400.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+        U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    @font-face {
+      font-family: "Merriweather";
+      font-style: normal;
+      font-weight: 700;
+      font-display: swap;
+      src: url("fonts/merriweather/merriweather-latin-700.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+        U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+
+    :root {
+      --aid2: #f2f5f3;
+      --bk100: #0d0e12;
+      --bk60: rgba(13, 14, 18, 0.6);
+      --bk05: rgba(13, 14, 18, 0.05);
+      --bk40: rgba(13, 14, 18, 0.4);
+      --success: #319f60;
+      --surf4: #d2dbd6;
+      --brand: #1f6246;
+      /* Figma color/assist4 — camera focus bracket (8543:11089) */
+      --assist4: #ffe16c;
+      --chief20: rgba(31, 98, 70, 0.2);
+      --wt12: rgba(255, 255, 255, 0.12);
+      --wt40: rgba(255, 255, 255, 0.4);
+      --wt100: #ffffff;
+      --wt20: rgba(255, 255, 255, 0.2);
+      --white40: rgba(255, 255, 255, 0.4);
+      --danger: #fe6153;
+      --bk80: rgba(13, 14, 18, 0.8);
+      --wt40glass: rgba(255, 255, 255, 0.4);
+      --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+        "Segoe UI", sans-serif;
+      /* Brand: Georgia first; Merriweather when Georgia is unavailable (e.g. many Linux desktops) */
+      --font-title: Georgia, Merriweather, "Times New Roman", serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #222;
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .screen {
+      position: relative;
+      width: 375px;
+      height: 812px;
+      overflow: hidden;
+      border-radius: 40px;
+      background: #0d0e12;
+      color: var(--bk100);
+    }
+
+    /* Multi-screen pages */
+    .page {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 40px;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.24s ease;
+    }
+
+    .page.is-active {
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .page--garden {
+      background: var(--aid2);
+      z-index: 1;
+    }
+
+    .page--video-call {
+      background: #ffffff;
+      z-index: 1;
+      color: var(--wt100);
+    }
+
+    /* —— Video call · Connecting / M3.0.1_Scanning — Figma 8543:10380 —— */
+    .vc-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+
+    .vc-bg-layer {
+      position: absolute;
+      inset: -24px;
+      filter: blur(15px);
+      transform: translateZ(0);
+    }
+
+    .vc-bg-layer img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Connecting blurred plate — Figma 8543:10381 · rounded-[20px] */
+    .vc-phase--connecting .vc-bg {
+      border-radius: 20px;
+    }
+
+    .vc-scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(13, 14, 18, 0.6);
+      pointer-events: none;
+    }
+
+    /* System status strip 375×44 — raster asset（黑底白字 status bar）；PNG @2× 750×88 → 375×44 */
+    .vc-status {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 375px;
+      height: 44px;
+      min-height: 44px;
+      max-height: 44px;
+      z-index: 20;
+      overflow: hidden;
+      pointer-events: none;
+      padding: 0;
+      margin: 0;
+      box-sizing: border-box;
+      background: transparent;
+    }
+
+    .vc-status-img {
+      display: block;
+      width: 375px;
+      height: 44px;
+      object-fit: fill;
+    }
+
+    .vc-hero {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 100px;
+      width: 267px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      z-index: 6;
+    }
+
+    .vc-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .vc-avatar img {
+      position: absolute;
+      width: 157.19%;
+      height: 279.44%;
+      left: -36.23%;
+      top: -35.69%;
+      max-width: none;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    .vc-name {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      font-weight: 590;
+      font-size: 18px;
+      line-height: 1.4;
+      color: var(--wt100);
+      text-align: center;
+      font-variation-settings: "wdth" 100;
+    }
+
+    /* Connecting pill — Figma 8543:10401 */
+    .vc-connect-pill {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 255px;
+      bottom: auto;
+      padding: 4px 10px;
+      border-radius: 41px;
+      background: var(--white40);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--wt20);
+      font-size: 14px;
+      font-weight: 400;
+      line-height: 1.3;
+      color: var(--wt100);
+      white-space: nowrap;
+      z-index: 19;
+      font-variation-settings: "wdth" 100;
+      cursor: pointer;
+    }
+
+    .vc-connect-pill:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.75);
+      outline-offset: 3px;
+      border-radius: 41px;
+    }
+
+    /* Connecting · Lottie plate — Figma 8543:10386 · 140×140 @ top 240px */
+    .vc-loader {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 240px;
+      width: 140px;
+      height: 140px;
+      overflow: hidden;
+      z-index: 14;
+      pointer-events: none;
+    }
+
+    .vc-connecting-lottie-host {
+      width: 140px;
+      height: 140px;
+      overflow: hidden;
+    }
+
+    .vc-connecting-lottie-host svg {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    .vc-info {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 0) scale(1);
+      top: 567px;
+      width: 335px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--wt20);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      box-sizing: border-box;
+      z-index: 10;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        opacity 0.28s cubic-bezier(0.33, 1, 0.68, 1),
+        transform 0.32s cubic-bezier(0.33, 1, 0.68, 1),
+        visibility 0s linear 0s;
+    }
+
+    .vc-info.vc-info--hidden {
+      opacity: 0;
+      transform: translate(-50%, 14px) scale(0.93);
+      pointer-events: none;
+      visibility: hidden;
+      transition:
+        opacity 0.26s cubic-bezier(0.32, 0, 0.67, 0),
+        transform 0.3s cubic-bezier(0.32, 0, 0.67, 0),
+        visibility 0s linear 0.3s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vc-info,
+      .vc-info.vc-info--hidden {
+        transition-duration: 0.01ms;
+        transition-delay: 0s !important;
+      }
+
+      .vc-info.vc-info--hidden {
+        transform: translate(-50%, 0) scale(1);
+      }
+    }
+
+    .vc-info-text {
+      flex: 1;
+      min-width: 0;
+      margin: 0;
+      font-size: 16px;
+      line-height: 1.3;
+      font-weight: 400;
+      color: var(--wt100);
+      font-variation-settings: "wdth" 100;
+    }
+
+    .vc-info-dismiss {
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 0;
+      cursor: pointer;
+      font-family: "Rco", sans-serif;
+      font-size: 20px;
+      line-height: 1;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.4px;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        transform 0.2s cubic-bezier(0.33, 1, 0.68, 1),
+        color 0.2s ease,
+        opacity 0.2s ease;
+    }
+
+    .vc-info-dismiss:hover {
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    .vc-info-dismiss:active {
+      transform: scale(0.88);
+      opacity: 0.85;
+    }
+
+    .vc-info.vc-info--hidden .vc-info-dismiss {
+      pointer-events: none;
+    }
+
+    .vc-hang-wrap {
+      position: absolute;
+      left: 0;
+      bottom: 34px;
+      width: 375px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 18;
+    }
+
+    .vc-hang {
+      width: 88px;
+      height: 88px;
+      border-radius: 100px;
+      background: var(--danger);
+      border: 1px solid var(--wt20);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      appearance: none;
+      padding: 0;
+      margin: 0;
+      font: inherit;
+      color: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vc-hang span {
+      font-family: "Rco", sans-serif;
+      font-size: 40px;
+      line-height: 1;
+      color: var(--wt100);
+      pointer-events: none;
+    }
+
+    .vc-home {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 375px;
+      height: 34px;
+      z-index: 22;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+
+    .vc-home .home-indicator-bar {
+      position: absolute;
+      left: calc(50% + 0.5px);
+      transform: translateX(-50%);
+      top: 20px;
+      bottom: 9px;
+      width: 134px;
+    }
+
+    /* Video phases: connecting · joining buffer Figma 8543:11257 · active */
+    .vc-phase {
+      position: absolute;
+      inset: 0;
+      border-radius: 40px;
+      overflow: hidden;
+      transition:
+        opacity 0.28s ease,
+        visibility 0.28s ease;
+    }
+
+    .vc-phase--connecting,
+    .vc-phase--joining,
+    .vc-phase--active {
+      z-index: 3;
+      pointer-events: auto;
+    }
+
+    .page--video-call[data-video-phase="connecting"] .vc-phase--joining,
+    .page--video-call[data-video-phase="connecting"] .vc-phase--active {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page--video-call[data-video-phase="joining"] .vc-phase--connecting,
+    .page--video-call[data-video-phase="joining"] .vc-phase--active {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page--video-call[data-video-phase="active"] .vc-phase--connecting,
+    .page--video-call[data-video-phase="active"] .vc-phase--joining {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Dialing screen vs ongoing call screen — layered swap + transition */
+    .vc-call-screen {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      overflow: hidden;
+      z-index: 0;
+      transition:
+        opacity 0.38s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0.38s ease,
+        transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    #page-video-call[data-vc-screen="dialing"] .vc-call-screen--dialing {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      z-index: 2;
+    }
+
+    #page-video-call[data-vc-screen="dialing"] .vc-call-screen--in-call {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-10px) scale(1.02);
+      z-index: 1;
+    }
+
+    #page-video-call[data-vc-screen="in-call"] .vc-call-screen--dialing {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(12px) scale(0.98);
+      z-index: 1;
+    }
+
+    #page-video-call[data-vc-screen="in-call"] .vc-call-screen--in-call {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0) scale(1);
+      z-index: 2;
+    }
+
+    /* Descendants cannot opt back into hit-testing while the video page is inactive (parent has pointer-events: none). */
+    #page-video-call:not(.is-active) .vc-phase {
+      pointer-events: none !important;
+    }
+
+    #page-video-call:not(.is-active) .vc-call-screen {
+      pointer-events: none !important;
+    }
+
+    /* In-call camera plate — Figma 8543:10832 · rounded image layer */
+    .vc-active-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    .vc-active-bg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Tap-to-focus bracket · Figma 8543:11089 · border 2 solid assist4 */
+    .vc-focus-hit {
+      position: absolute;
+      inset: 0;
+      z-index: 5;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vc-focus-frame {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 64px;
+      height: 64px;
+      box-sizing: border-box;
+      border: 2px solid var(--assist4);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(1);
+    }
+
+    .vc-focus-frame.vc-focus-frame--visible {
+      opacity: 1;
+      visibility: visible;
+      animation: vc-focus-frame-pop 0.22s ease-out both;
+    }
+
+    @keyframes vc-focus-frame-pop {
+      from {
+        opacity: 0;
+        transform: scale(1.06);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .vc-active-grad-top {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 375px;
+      height: 100px;
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent);
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    .vc-active-grad-bottom {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 375px;
+      height: 300px;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+      pointer-events: none;
+      z-index: 6;
+    }
+
+    /* Spec (in-call header): status bar 44px; nav row 56px below it; horizontal inset 20px; 40px pills with 8px vertical inset (8+40+8=56). */
+    .vc-call-nav {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 44px;
+      width: 375px;
+      height: 56px;
+      min-height: 56px;
+      max-height: 56px;
+      padding: 8px 20px;
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      column-gap: 12px;
+      z-index: 25;
+    }
+
+    .vc-call-nav-start {
+      justify-self: start;
+      display: flex;
+      align-items: center;
+    }
+
+    .vc-call-nav-end {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Three-way call UI: listening (CC left, muted subtitle bubble) vs AI / user speaking (minimize left, active bubble) */
+    #page-video-call[data-vc-call-ui="listening"] .vc-call-nav-leading-minimize {
+      display: none !important;
+    }
+
+    #page-video-call[data-vc-call-ui="listening"] .vc-call-nav-cc {
+      display: flex;
+    }
+
+    #page-video-call:not([data-vc-call-ui="listening"]) .vc-call-nav-cc {
+      display: none !important;
+    }
+
+    #page-video-call:not([data-vc-call-ui="listening"]) .vc-call-nav-leading-minimize {
+      display: flex;
+    }
+
+    #page-video-call[data-vc-subtitles="collapsed"] #vc-processing-card {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateX(-50%) translateY(-18px) scale(0.93);
+    }
+
+    .vc-call-timer {
+      margin: 0;
+      justify-self: center;
+      grid-column: 2;
+      text-align: center;
+      font-weight: 590;
+      font-size: 16px;
+      line-height: 1.3;
+      color: var(--wt100);
+      font-variation-settings: "wdth" 100;
+    }
+
+    .vc-call-minimize {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 23px;
+      border: 1px solid var(--wt20);
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      appearance: none;
+      padding: 0;
+      margin: 0;
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--wt100);
+      letter-spacing: 0.48px;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+    }
+
+    /* Subtitle collapse toggle · Figma 8622:9288 — expanded: 收起 (\ue997); collapsed: CC (\ue95b) */
+    #vc-cc-toggle .vc-sub-toggle-icon,
+    #vc-call-minimize-leading .vc-sub-toggle-icon {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition:
+        opacity 0.26s cubic-bezier(0.32, 0.72, 0, 1),
+        transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    #page-video-call[data-vc-subtitles="expanded"] .vc-sub-toggle-icon--collapse {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    #page-video-call[data-vc-subtitles="expanded"] .vc-sub-toggle-icon--expand {
+      opacity: 0;
+      transform: scale(0.78);
+      pointer-events: none;
+    }
+
+    #page-video-call[data-vc-subtitles="collapsed"] .vc-sub-toggle-icon--collapse {
+      opacity: 0;
+      transform: scale(0.78);
+      pointer-events: none;
+    }
+
+    #page-video-call[data-vc-subtitles="collapsed"] .vc-sub-toggle-icon--expand {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* Below header: 44px status + 56px nav = 100px */
+    .vc-processing-card {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%) translateY(0) scale(1);
+      top: 100px;
+      width: 335px;
+      max-width: 335px;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      border-radius: 16px;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: flex-start;
+      z-index: 12;
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        opacity 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+        transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /* AI / Plant Doctor speaking — Figma 8543:10853 · chief/20 + white/20 · fixed 100px (no Lottie column) */
+    .vc-processing-card--doctor {
+      height: 100px;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: var(--chief20);
+      border: 1px solid var(--wt20);
+    }
+
+    .vc-processing-card--doctor .vc-active-lottie-host {
+      display: none;
+    }
+
+    /* Joining buffer subtitle — Figma 8543:11275 · dots visible beside spacer */
+    .vc-processing-card.vc-joining-card.vc-processing-card--doctor .vc-active-lottie-host {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    .vc-processing-card.vc-joining-card .vc-joining-card-text-spacer {
+      flex: 1;
+      min-width: 0;
+      max-height: none;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    /* PlantAid/Title/20 — Figma 8543:11274 */
+    .vc-joining-caption {
+      position: absolute;
+      left: 50%;
+      top: 668px;
+      transform: translate(-50%, -100%);
+      width: 375px;
+      max-width: 100%;
+      margin: 0;
+      padding: 0 28px;
+      box-sizing: border-box;
+      text-align: center;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.3;
+      color: var(--wt100);
+      pointer-events: none;
+      z-index: 17;
+    }
+
+    /* User speaking — Figma 8543:10834 · nt/wt/40 + white/20 stroke */
+    .vc-processing-card--user {
+      height: 100px;
+      overflow: hidden;
+      box-sizing: border-box;
+      background: var(--wt40glass);
+      border: 1px solid var(--wt20);
+    }
+
+    .vc-processing-card--user .vc-active-lottie-host {
+      display: none;
+    }
+
+    .vc-processing-card-inner {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .vc-processing-text-wrap {
+      flex: 1;
+      min-width: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .vc-processing-card--doctor .vc-processing-text-wrap,
+    .vc-processing-card--user .vc-processing-text-wrap {
+      max-height: calc(100px - 24px);
+    }
+
+    .vc-processing-text-wrap::-webkit-scrollbar {
+      display: none;
+    }
+
+    .vc-processing-typewriter {
+      margin: 0;
+      max-width: 307px;
+      font-weight: 590;
+      font-size: 18px;
+      line-height: 1.4;
+      font-variation-settings: "wdth" 100;
+      transition: color 0.22s ease;
+    }
+
+    .vc-processing-card--doctor .vc-processing-typewriter {
+      color: var(--wt100);
+    }
+
+    .vc-processing-card--user .vc-processing-typewriter {
+      color: var(--bk80);
+      font-weight: 700;
+    }
+
+    /* Listening：字幕常驻，样式弱化以便区分「AI/用户正在说」 */
+    #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--doctor {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(255, 255, 255, 0.24);
+    }
+
+    #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--doctor .vc-processing-typewriter {
+      color: rgba(255, 255, 255, 0.78);
+    }
+
+    #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--user {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: rgba(255, 255, 255, 0.32);
+    }
+
+    #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--user .vc-processing-typewriter {
+      color: rgba(13, 14, 18, 0.52);
+      font-weight: 590;
+    }
+
+    /* Figma 8543:10888 · PlantAid/Title/20 — prompt user to speak (listening state) */
+    .vc-voice-hint {
+      position: absolute;
+      left: 50%;
+      top: 668px;
+      transform: translate(-50%, -100%);
+      width: 375px;
+      max-width: 100%;
+      margin: 0;
+      padding: 0 28px;
+      box-sizing: border-box;
+      text-align: center;
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.3;
+      color: var(--wt100);
+      pointer-events: none;
+      z-index: 17;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.24s ease,
+        visibility 0.24s ease;
+    }
+
+    .vc-voice-hint.vc-voice-hint--visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #page-video-call[data-vc-subtitles="collapsed"] .vc-voice-hint.vc-voice-hint--visible {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vc-voice-hint {
+        transition-duration: 0.01ms;
+      }
+    }
+
+    .vc-active-lottie-host {
+      width: 59px;
+      height: 24px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .vc-active-lottie-host svg {
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* Connecting · bottom hangup only — Figma 8543:10409 */
+    .vc-phase-connecting-controls {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 678px;
+      width: 375px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      z-index: 18;
+    }
+
+    .vc-connecting-end-call {
+      width: 88px;
+      height: 88px;
+      border-radius: 100px;
+      flex-shrink: 0;
+      border: 1px solid var(--wt20);
+      background: var(--danger);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      appearance: none;
+      padding: 0;
+      margin: 0;
+      font-family: "Rco", sans-serif;
+      font-size: 40px;
+      line-height: 1;
+      color: var(--wt100);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vc-connecting-end-call:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.85);
+      outline-offset: 3px;
+    }
+
+    .vc-active-controls {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 678px;
+      width: 375px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      z-index: 18;
+    }
+
+    .vc-active-round-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 100px;
+      flex-shrink: 0;
+      border: 1px solid var(--wt20);
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      appearance: none;
+      padding: 0;
+      margin: 0;
+      font-family: "Rco", sans-serif;
+      font-size: 28px;
+      line-height: 1;
+      color: var(--wt100);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vc-active-round-btn--danger {
+      color: var(--danger);
+    }
+
+    /* Torch · Figma 8543:11042 — ON: solid white pill + assist green glyph (\ue9b5) */
+    .vc-active-round-btn.vc-torch-btn {
+      transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        backdrop-filter 0.18s ease;
+    }
+
+    .vc-active-round-btn.vc-active-round-btn--torch-on {
+      background: var(--wt100);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      color: var(--success);
+    }
+
+    .vc-phase--active .vc-home {
+      z-index: 22;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vc-phase {
+        transition-duration: 0.01ms;
+      }
+
+      .vc-active-round-btn.vc-torch-btn {
+        transition-duration: 0.01ms;
+      }
+
+      .vc-focus-frame.vc-focus-frame--visible {
+        animation: none;
+      }
+
+      #vc-processing-card {
+        transition:
+          background 0.22s ease,
+          border-color 0.22s ease,
+          opacity 0.01ms,
+          transform 0.01ms;
+      }
+
+      #vc-cc-toggle .vc-sub-toggle-icon,
+      #vc-call-minimize-leading .vc-sub-toggle-icon {
+        transition-duration: 0.01ms !important;
+      }
+
+      #page-video-call .vc-call-screen {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Floating circular dock (prototype helper — not in Figma frame) */
+    .page-dock {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 5px;
+      padding: 6px;
+      border-radius: 999px;
+      transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease,
+        gap 0.22s ease,
+        padding 0.22s ease;
+    }
+
+    .page-dock__fabs {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
+      justify-items: center;
+      transition: gap 0.22s ease;
+    }
+
+    .page-dock:not(.page-dock--collapsed) .page-dock__fab:nth-child(1) {
+      grid-row: 1;
+    }
+
+    .page-dock:not(.page-dock--collapsed) .page-dock__fab:nth-child(2) {
+      grid-row: 2;
+    }
+
+    .page-dock:not(.page-dock--collapsed) .page-dock__fab:nth-child(3) {
+      grid-row: 3;
+    }
+
+    .page-dock:not(.page-dock--collapsed) .page-dock__fab {
+      opacity: 1;
+      z-index: auto;
+      pointer-events: auto;
+    }
+
+    .page-dock--collapsed .page-dock__fabs {
+      gap: 0;
+    }
+
+    .page-dock--collapsed .page-dock__fab {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .page-dock--collapsed .page-dock__fab.is-active {
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-dock--collapsed .page-dock__fab:not(.is-active) {
+      position: relative;
+      opacity: 0;
+      z-index: 2;
+      pointer-events: auto;
+    }
+
+    .page-dock__toggle {
+      appearance: none;
+      border: none;
+      margin: 0;
+      padding: 2px 0 4px;
+      cursor: pointer;
+      background: transparent;
+      border-radius: 999px;
+      line-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.72;
+      transition:
+        opacity 0.18s ease,
+        background 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .page-dock__toggle:hover {
+      opacity: 1;
+    }
+
+    .page-dock__toggle:focus-visible {
+      outline: 2px solid rgba(31, 98, 70, 0.55);
+      outline-offset: 2px;
+    }
+
+    .screen[data-video-dock-active="true"] .page-dock__toggle:focus-visible {
+      outline-color: rgba(255, 255, 255, 0.85);
+    }
+
+    .page-dock__toggle-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.24s ease;
+    }
+
+    .page-dock__toggle-icon svg {
+      display: block;
+    }
+
+    .page-dock--collapsed .page-dock__toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Dock chevron: ongoing call — flipped vertically vs dialing (expanded ⇄ collapsed inverted). */
+    .screen[data-video-dock-active="true"][data-vc-call-screen="in-call"]
+      .page-dock:not(.page-dock--collapsed)
+      .page-dock__toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    .screen[data-video-dock-active="true"][data-vc-call-screen="in-call"] .page-dock--collapsed .page-dock__toggle-icon {
+      transform: rotate(0deg);
+    }
+
+    .screen[data-active-page="garden"] .page-dock {
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(13, 14, 18, 0.09);
+      box-shadow: 0 10px 32px rgba(13, 14, 18, 0.14);
+    }
+
+    .screen[data-video-dock-active="true"] .page-dock {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .page-dock__fab {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      appearance: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Rco", sans-serif;
+      font-size: 16px;
+      line-height: 1;
+      transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease,
+        color 0.18s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .screen[data-active-page="garden"] .page-dock__fab {
+      background: rgba(242, 245, 243, 0.98);
+      color: var(--bk40);
+    }
+
+    .screen[data-active-page="garden"] .page-dock__fab.is-active {
+      background: rgba(31, 98, 70, 0.14);
+      color: var(--brand);
+      box-shadow: 0 0 0 2px rgba(31, 98, 70, 0.42);
+    }
+
+    .screen[data-video-dock-active="true"] .page-dock__fab {
+      background: rgba(255, 255, 255, 0.16);
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .screen[data-video-dock-active="true"] .page-dock__fab.is-active {
+      background: rgba(255, 255, 255, 0.42);
+      color: var(--wt100);
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.65);
+    }
+
+    .page-dock__fab:hover {
+      transform: scale(1.05);
+    }
+
+    .screen[data-active-page="garden"] .page-dock__toggle {
+      color: rgba(13, 14, 18, 0.42);
+    }
+
+    .screen[data-video-dock-active="true"] .page-dock__toggle {
+      color: rgba(255, 255, 255, 0.72);
+    }
+
+    /* —— Quick-action sheet 8593:8051 —— */
+    .action-sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      background: rgba(13, 14, 18, 0.28);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+
+    .screen.action-sheet-open .action-sheet-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Dock sits at z-index 400; lift sheet above it while open so rows (e.g. Video Call) stay clickable */
+    .screen.action-sheet-open .page-dock {
+      z-index: 405;
+    }
+
+    .screen.action-sheet-open .action-sheet-backdrop {
+      z-index: 406;
+    }
+
+    .screen.action-sheet-open .action-sheet {
+      z-index: 407;
+    }
+
+    /*
+     * Sheet/backdrop live inside #page-garden (stacking context z-index 1). Dock is a sibling at 400,
+     * so it always painted above the garden subtree — rows stayed unclickable. Lift garden above dock while open.
+     */
+    .screen.action-sheet-open .page--garden {
+      z-index: 410;
+    }
+
+    /* list 295×208 @ y=486 ↔ bottom: 118px */
+    .action-sheet {
+      position: absolute;
+      left: 40px;
+      bottom: 118px;
+      width: 295px;
+      padding: 10px;
+      border-radius: 24px;
+      background: var(--brand);
+      border: 1px solid var(--chief20);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+      z-index: 9;
+      transform: translateY(calc(100% + 120px));
+      opacity: 0;
+      pointer-events: none;
+      transition:
+        transform 0.38s cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 0.26s ease;
+    }
+
+    .screen.action-sheet-open .action-sheet {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .action-sheet-row {
+      width: 100%;
+      margin: 0;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 20px;
+      background: var(--wt12);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.26s ease, transform 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .action-sheet-row:active {
+      filter: brightness(1.06);
+    }
+
+    .screen:not(.action-sheet-open) .action-sheet-row {
+      opacity: 0;
+      transform: translateY(16px);
+      transition-delay: 0s;
+    }
+
+    .screen.action-sheet-open .action-sheet-row:nth-child(1) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.07s;
+    }
+
+    .screen.action-sheet-open .action-sheet-row:nth-child(2) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.11s;
+    }
+
+    .screen.action-sheet-open .action-sheet-row:nth-child(3) {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 0.15s;
+    }
+
+    .action-sheet-row-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Rco", sans-serif;
+      font-size: 22px;
+      line-height: 1;
+      color: var(--wt100);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .action-sheet-row-body {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .action-sheet-row-label {
+      flex: 1;
+      font-weight: 590;
+      font-size: 16px;
+      line-height: 1.3;
+      color: var(--wt100);
+      font-variation-settings: "wdth" 100;
+    }
+
+    .action-sheet-row-trail {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-sheet-badge {
+      display: block;
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
+    }
+
+    .action-sheet-row-chevron {
+      flex-shrink: 0;
+      font-family: "Rco", sans-serif;
+      font-size: 16px;
+      line-height: 1.3;
+      letter-spacing: 0.32px;
+      color: var(--wt40);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .action-sheet,
+      .action-sheet-backdrop,
+      .action-sheet-row,
+      .tab-scan-glyph--scan,
+      .tab-scan-glyph--close {
+        transition: none !important;
+      }
+
+      .screen:not(.action-sheet-open) .action-sheet-row {
+        opacity: 1;
+        transform: none;
+      }
+
+      .screen.action-sheet-open .tab-scan-glyph--scan {
+        opacity: 0;
+        transform: scale(0.35);
+      }
+
+      .screen.action-sheet-open .tab-scan-glyph--close {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* —— Header / status —— */
+    .header {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 375px;
+      height: 100px;
+      background: var(--aid2);
+      z-index: 5;
+    }
+
+    /* Status bar: raster strip (375×44), replaces DOM-built clock / icons */
+    .status-strip {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 375px;
+      height: 44px;
+      overflow: hidden;
+      font-size: 0;
+      line-height: 0;
+    }
+
+    .status-strip img {
+      display: block;
+      width: 375px;
+      height: 44px;
+      object-fit: fill;
+    }
+
+    .title-strip {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 44px;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      background: var(--aid2);
+    }
+
+    .title-strip h1 {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1.4;
+      color: var(--bk100);
+    }
+
+    /* —— Main content —— */
+    .content {
+      position: absolute;
+      left: 0;
+      top: 116px;
+      width: 375px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stats {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 10px 10px;
+      overflow: hidden;
+    }
+
+    .stat-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-width: 0;
+    }
+
+    .stat-num {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 28px;
+      line-height: 1.3;
+      color: var(--success);
+    }
+
+    .stat-label {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: normal;
+      color: var(--bk60);
+    }
+
+    .stat-divider {
+      width: 1px;
+      height: 38px;
+      border-radius: 1px;
+      background: var(--surf4);
+      flex-shrink: 0;
+    }
+
+    .plant-card {
+      width: 335px;
+      background: var(--wt100);
+      border-radius: 20px;
+      padding: 10px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    /* 8621:9128 pic — outer stroke nt/bk/05 per Dev export */
+    .thumb {
+      position: relative;
+      width: 75px;
+      height: 100px;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      border-radius: 12px;
+      border: 1px solid var(--bk05);
+      overflow: hidden;
+      background: var(--aid2);
+    }
+
+    .thumb-inner {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .thumb-inner img {
+      position: absolute;
+      width: 202.22%;
+      height: 151.67%;
+      left: -47.01%;
+      top: -1.2%;
+      max-width: none;
+      object-fit: cover;
+      display: block;
+    }
+
+    .plant-text {
+      flex: 1;
+      min-width: 0;
+      min-height: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      line-height: 1.3;
+    }
+
+    .plant-name {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 20px;
+      color: var(--bk100);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .plant-meta {
+      font-size: 16px;
+      font-weight: 400;
+      color: var(--bk60);
+    }
+
+    /*
+     * Bottom tab — nested under 8593:8223 · `btm_tab` 8617:3573 (Dev export).
+     */
+    .tabbar {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 375px;
+      height: 86px;
+      background: var(--wt100);
+      border-top: 1px solid var(--aid2);
+      padding: 0 10px;
+      box-sizing: border-box;
+      z-index: 10;
+      overflow: visible;
+    }
+
+    .tabbar-inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 100%;
+      height: 64px;
+      box-sizing: border-box;
+    }
+
+    /* Side tabs — Dev: py-[8px] gap-[2px] items-center (8593:8223) */
+    .tab {
+      flex: 0 0 60px;
+      width: 60px;
+      height: 64px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 0;
+      gap: 2px;
+      margin: 0;
+      text-align: center;
+      color: var(--bk40);
+      box-sizing: border-box;
+    }
+
+    .tab--active {
+      color: var(--brand);
+    }
+
+    .tab__icon {
+      flex-shrink: 0;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .tab__label {
+      flex-shrink: 0;
+      height: 12px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      font-weight: 590;
+      font-size: 10px;
+      line-height: normal;
+      width: 100%;
+      font-variation-settings: "wdth" 100;
+    }
+
+    .tab-scan-slot {
+      position: relative;
+      flex: 0 0 80px;
+      width: 80px;
+      height: 64px;
+      min-width: 80px;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+
+    /* 8617:3585 Scan_Btn — 80×60 border-box（含 6px 白边），rounded 24（Dev） */
+    .tab-scan-btn {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 14px;
+      width: 80px;
+      height: 60px;
+      margin-left: auto;
+      margin-right: auto;
+      transform: translateX(-1px);
+      border-radius: 24px;
+      background: var(--brand);
+      border: 6px solid var(--wt100);
+      border-style: solid;
+      box-sizing: border-box;
+      appearance: none;
+      padding: 0;
+      font: inherit;
+      color: inherit;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* FAB glyphs: 8617:3586 scan (38px) ↔ 8593:8132 close \\uE92A (30px) */
+    .tab-scan-glyph-stack {
+      position: relative;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .tab-scan-glyph {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      font-family: "Rco", sans-serif;
+      font-style: normal;
+      font-weight: normal;
+      line-height: normal;
+      color: var(--wt100);
+      white-space: nowrap;
+      text-align: center;
+      -webkit-font-smoothing: antialiased;
+      transition:
+        transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.22s ease;
+    }
+
+    .tab-scan-glyph--scan {
+      font-size: 38px;
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .tab-scan-glyph--close {
+      font-size: 30px;
+      transform: translate(-50%, -50%) scale(0.35);
+      opacity: 0;
+      transition:
+        transform 0.3s cubic-bezier(0.34, 1.45, 0.64, 1) 0.08s,
+        opacity 0.22s ease 0.06s;
+    }
+
+    .screen.action-sheet-open .tab-scan-glyph--scan {
+      transform: translate(-50%, -50%) scale(0.28);
+      opacity: 0;
+      transition:
+        transform 0.22s cubic-bezier(0.4, 0, 1, 1),
+        opacity 0.18s ease;
+    }
+
+    .screen.action-sheet-open .tab-scan-glyph--close {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+
+    .home-indicator {
+      position: absolute;
+      left: 0;
+      top: 52px;
+      width: 375px;
+      height: 34px;
+      z-index: 1;
+      pointer-events: none;
+      box-sizing: border-box;
+    }
+
+    .home-indicator-bar {
+      position: absolute;
+      left: calc(50% + 0.5px);
+      transform: translateX(-50%);
+      top: 20px;
+      bottom: 9px;
+      width: 134px;
+      box-sizing: border-box;
+    }
+
+    .home-indicator-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+    }
+
+  </style>
+</head>
+<body>
+  <main class="screen" id="app-screen" data-active-page="garden" data-video-dock-active="false" aria-label="PlantAID">
+    <div class="page page--garden is-active" id="page-garden" aria-hidden="false">
+    <header class="header">
+      <div class="status-strip">
+        <img
+          src="assets/status-bar.png"
+          alt=""
+          width="375"
+          height="44"
+          decoding="async"
+        />
+      </div>
+      <div class="title-strip">
+        <h1>My Garden</h1>
+      </div>
+    </header>
+
+    <section class="content">
+      <div class="stats">
+        <div class="stat-col">
+          <span class="stat-num">1</span>
+          <span class="stat-label">Plant(s)</span>
+        </div>
+        <div class="stat-divider" role="presentation"></div>
+        <div class="stat-col">
+          <span class="stat-num">0</span>
+          <span class="stat-label">Todo Today</span>
+        </div>
+      </div>
+
+      <article class="plant-card">
+        <div class="thumb">
+          <div class="thumb-inner">
+            <img src="assets/garden-thumb.png" alt="" decoding="async" />
+          </div>
+        </div>
+        <div class="plant-text">
+          <h2 class="plant-name">Peace Lily</h2>
+          <p class="plant-meta">Spathiphyllum Wallisii</p>
+        </div>
+      </article>
+    </section>
+
+    <div class="action-sheet-backdrop" id="action-sheet-backdrop" aria-hidden="true"></div>
+
+    <aside
+      id="plantaid-action-sheet"
+      class="action-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-hidden="true"
+      aria-label="Quick actions"
+    >
+      <button type="button" class="action-sheet-row">
+        <span class="action-sheet-row-icon" aria-hidden="true">&#xe994;</span>
+        <span class="action-sheet-row-body">
+          <span class="action-sheet-row-label">Scan</span>
+          <span class="action-sheet-row-chevron" aria-hidden="true">&#xe901;</span>
+        </span>
+      </button>
+      <button type="button" class="action-sheet-row" data-nav-page="video-dialing">
+        <span class="action-sheet-row-icon" aria-hidden="true">&#xe974;</span>
+        <span class="action-sheet-row-body">
+          <span class="action-sheet-row-label">Video Call</span>
+          <span class="action-sheet-row-trail">
+            <img class="action-sheet-badge" src="assets/list-row-badge.svg" alt="" width="10" height="10" decoding="async" />
+            <span class="action-sheet-row-chevron" aria-hidden="true">&#xe901;</span>
+          </span>
+        </span>
+      </button>
+      <button type="button" class="action-sheet-row">
+        <span class="action-sheet-row-icon" aria-hidden="true">&#xe99b;</span>
+        <span class="action-sheet-row-body">
+          <span class="action-sheet-row-label">Chatbot</span>
+          <span class="action-sheet-row-trail">
+            <img class="action-sheet-badge" src="assets/list-row-badge.svg" alt="" width="10" height="10" decoding="async" />
+            <span class="action-sheet-row-chevron" aria-hidden="true">&#xe901;</span>
+          </span>
+        </span>
+      </button>
+    </aside>
+
+    <nav class="tabbar" aria-label="Primary">
+      <div class="tabbar-inner">
+        <div class="tab tab--active">
+          <span class="tab__icon" aria-hidden="true">&#xe97f;</span>
+          <span class="tab__label">Garden</span>
+        </div>
+        <div class="tab">
+          <span class="tab__icon" aria-hidden="true">&#xe99f;</span>
+          <span class="tab__label">Calendar</span>
+        </div>
+        <div class="tab-scan-slot">
+          <button
+            type="button"
+            class="tab-scan-btn"
+            id="tab-scan-toggle"
+            aria-expanded="false"
+            aria-controls="plantaid-action-sheet"
+            aria-label="Quick actions"
+          >
+            <span class="tab-scan-glyph-stack">
+              <span class="tab-scan-glyph tab-scan-glyph--scan" aria-hidden="true">&#xe9a2;</span>
+              <span class="tab-scan-glyph tab-scan-glyph--close" aria-hidden="true">&#xe92a;</span>
+            </span>
+          </button>
+        </div>
+        <div class="tab">
+          <span class="tab__icon" aria-hidden="true">&#xe98f;</span>
+          <span class="tab__label">For You</span>
+        </div>
+        <div class="tab">
+          <span class="tab__icon" aria-hidden="true">&#xe98b;</span>
+          <span class="tab__label">Settings</span>
+        </div>
+      </div>
+      <div class="home-indicator" aria-hidden="true">
+        <div class="home-indicator-bar">
+          <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+        </div>
+      </div>
+    </nav>
+    </div>
+
+    <div class="page page--video-call" id="page-video-call" aria-hidden="true" data-video-phase="connecting" data-vc-screen="dialing" data-vc-camera="front" data-vc-call-ui="listening" data-vc-speaker="doctor" data-vc-subtitles="expanded" data-vc-torch="off">
+      <audio id="vc-ring-audio" data-vc-bgm-id="1" data-vc-bgm-role="dialing" loop preload="auto" playsinline>
+        <source src="assets/ring-marimba-universfield-487903.mp3" type="audio/mpeg" />
+      </audio>
+      <audio id="vc-end-call-audio" data-vc-bgm-id="2" data-vc-bgm-role="hang-up" preload="auto" playsinline>
+        <source src="assets/end-call-z31mph1yzr-120633.mp3" type="audio/mpeg" />
+      </audio>
+
+      <div class="vc-call-screen vc-call-screen--dialing">
+      <div class="vc-phase vc-phase--connecting" aria-hidden="false">
+      <div class="vc-bg" aria-hidden="true">
+        <div class="vc-bg-layer">
+          <img src="assets/vc-connecting-bg.png" alt="" decoding="async" />
+        </div>
+      </div>
+      <div class="vc-scrim" aria-hidden="true"></div>
+      <div class="vc-status" aria-hidden="true">
+        <img
+          class="vc-status-img"
+          src="assets/vc-status-bar-white.png"
+          alt=""
+          width="375"
+          height="44"
+          decoding="async"
+        />
+      </div>
+      <div class="vc-hero">
+        <div class="vc-avatar">
+          <img src="assets/vc-connecting-bg.png" alt="" decoding="async" />
+        </div>
+        <p class="vc-name">Plant Doctor</p>
+      </div>
+      <div class="vc-connect-pill" id="vc-connect-pill" role="button" tabindex="0">Connecting...</div>
+      <div class="vc-loader" aria-hidden="true">
+        <!-- Lottie：拨打中 loading → Spinner Dots（内嵌 vc-connecting-lottie-data，fallback VC_LOTTIE_DIALING_PATH） -->
+        <div id="vc-connecting-lottie" class="vc-connecting-lottie-host"></div>
+      </div>
+      <div class="vc-info" id="vc-info-card">
+        <p class="vc-info-text">
+          Plant Doctor helps you identify plants, diagnose issues, and offers advice.
+        </p>
+        <button type="button" class="vc-info-dismiss" id="vc-info-dismiss" aria-label="Dismiss tip">
+          <span aria-hidden="true">&#xe92a;</span>
+        </button>
+      </div>
+      <div class="vc-phase-connecting-controls">
+          <button type="button" class="vc-connecting-end-call" id="vc-hangup" aria-label="End call">
+            &#xe92a;
+          </button>
+        </div>
+      <div class="vc-home" aria-hidden="true">
+        <div class="home-indicator-bar">
+          <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+        </div>
+      </div>
+      </div>
+      </div>
+
+      <div class="vc-call-screen vc-call-screen--in-call">
+      <div class="vc-phase vc-phase--joining" aria-hidden="true">
+        <div class="vc-active-bg" aria-hidden="true">
+          <img src="assets/video-call-active-bg.jpg" alt="" decoding="async" />
+        </div>
+        <div class="vc-focus-hit" aria-hidden="true">
+          <div class="vc-focus-frame" aria-hidden="true"></div>
+        </div>
+        <div class="vc-active-grad-top" aria-hidden="true"></div>
+        <div class="vc-active-grad-bottom" aria-hidden="true"></div>
+        <div class="vc-status" aria-hidden="true">
+          <img
+            class="vc-status-img"
+            src="assets/vc-status-bar-white.png"
+            alt=""
+            width="375"
+            height="44"
+            decoding="async"
+          />
+        </div>
+        <nav class="vc-call-nav" aria-label="In-call header">
+          <div class="vc-call-nav-start">
+            <button type="button" class="vc-call-minimize" id="vc-join-minimize-leading" aria-label="Minimize call">
+              &#xe997;
+            </button>
+          </div>
+          <p class="vc-call-timer" id="vc-join-call-timer">00:00</p>
+          <div class="vc-call-nav-end">
+            <button type="button" class="vc-call-minimize" id="vc-join-chatbot-chip" aria-label="Chatbot">
+              &#xe99b;
+            </button>
+          </div>
+        </nav>
+        <div class="vc-processing-card vc-processing-card--doctor vc-joining-card" id="vc-joining-card">
+          <div class="vc-processing-card-inner">
+            <!-- Lottie：字幕/会话加载 → Three dots（内嵌 vc-active-lottie-data，fallback VC_LOTTIE_SUBTITLES_LOADING_PATH） -->
+            <div id="vc-joining-lottie" class="vc-active-lottie-host" aria-hidden="false"></div>
+            <div class="vc-processing-text-wrap vc-joining-card-text-spacer" aria-hidden="true"></div>
+          </div>
+        </div>
+        <p class="vc-joining-caption">Connecting...</p>
+        <div class="vc-active-controls vc-phase-joining-controls">
+          <button type="button" class="vc-active-round-btn vc-active-round-btn--danger" id="vc-join-hangup" aria-label="End call">
+            &#xe92a;
+          </button>
+          <button type="button" class="vc-active-round-btn" id="vc-join-flip" aria-label="Flip camera">
+            &#xe919;
+          </button>
+          <button
+            type="button"
+            class="vc-active-round-btn vc-torch-btn"
+            id="vc-join-torch"
+            aria-label="Flashlight off"
+            aria-pressed="false"
+          >
+            &#xe9b6;
+          </button>
+        </div>
+        <div class="vc-home" aria-hidden="true">
+          <div class="home-indicator-bar">
+            <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+          </div>
+        </div>
+      </div>
+
+      <div class="vc-phase vc-phase--active" aria-hidden="true">
+        <div class="vc-active-bg" aria-hidden="true">
+          <img src="assets/video-call-active-bg.jpg" alt="" decoding="async" />
+        </div>
+        <div class="vc-focus-hit" aria-hidden="true">
+          <div class="vc-focus-frame" aria-hidden="true"></div>
+        </div>
+        <div class="vc-active-grad-top" aria-hidden="true"></div>
+        <div class="vc-active-grad-bottom" aria-hidden="true"></div>
+        <div class="vc-status" aria-hidden="true">
+          <img
+            class="vc-status-img"
+            src="assets/vc-status-bar-white.png"
+            alt=""
+            width="375"
+            height="44"
+            decoding="async"
+          />
+        </div>
+        <nav class="vc-call-nav" aria-label="In-call header">
+          <div class="vc-call-nav-start">
+            <button type="button" class="vc-call-minimize vc-call-nav-cc" id="vc-cc-toggle" aria-pressed="true" aria-label="Hide subtitles">
+              <span class="vc-sub-toggle-icon vc-sub-toggle-icon--collapse" aria-hidden="true">&#xe997;</span>
+              <span class="vc-sub-toggle-icon vc-sub-toggle-icon--expand" aria-hidden="true">&#xe95b;</span>
+            </button>
+            <button type="button" class="vc-call-minimize vc-call-nav-leading-minimize" id="vc-call-minimize-leading" aria-pressed="true" aria-label="Hide subtitles">
+              <span class="vc-sub-toggle-icon vc-sub-toggle-icon--collapse" aria-hidden="true">&#xe997;</span>
+              <span class="vc-sub-toggle-icon vc-sub-toggle-icon--expand" aria-hidden="true">&#xe95b;</span>
+            </button>
+          </div>
+          <p class="vc-call-timer" id="vc-call-timer">00:00</p>
+          <div class="vc-call-nav-end">
+            <button type="button" class="vc-call-minimize" id="vc-call-chatbot-chip" aria-label="Chatbot">
+              &#xe99b;
+            </button>
+          </div>
+        </nav>
+        <div
+          class="vc-processing-card vc-processing-card--doctor"
+          id="vc-processing-card"
+          data-speaker="doctor"
+        >
+          <div class="vc-processing-card-inner">
+            <!-- Lottie：接通后字幕区 loading → 同上 Three dots -->
+            <div id="vc-active-lottie" class="vc-active-lottie-host" aria-hidden="true"></div>
+            <div class="vc-processing-text-wrap" id="vc-processing-text-wrap">
+              <p id="vc-processing-typewriter" class="vc-processing-typewriter" aria-live="polite"></p>
+            </div>
+          </div>
+        </div>
+        <p class="vc-voice-hint" id="vc-voice-hint" aria-hidden="true">Please start speaking.</p>
+        <div class="vc-active-controls">
+          <button type="button" class="vc-active-round-btn vc-active-round-btn--danger" id="vc-active-hangup" aria-label="End call">
+            &#xe92a;
+          </button>
+          <button type="button" class="vc-active-round-btn" id="vc-active-flip" aria-label="Flip camera">
+            &#xe919;
+          </button>
+          <button
+            type="button"
+            class="vc-active-round-btn vc-torch-btn"
+            id="vc-active-torch"
+            aria-label="Flashlight off"
+            aria-pressed="false"
+          >
+            &#xe9b6;
+          </button>
+        </div>
+        <div class="vc-home" aria-hidden="true">
+          <div class="home-indicator-bar">
+            <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+
+    <nav class="page-dock" id="page-dock" aria-label="Screen navigation">
+      <div class="page-dock__fabs" id="page-dock-fabs">
+        <button type="button" class="page-dock__fab is-active" data-page="garden" aria-label="主页" aria-current="page">
+          &#xe97f;
+        </button>
+        <button type="button" class="page-dock__fab" data-page="video-dialing" aria-label="拨打中">
+          &#xe974;
+        </button>
+        <button type="button" class="page-dock__fab" data-page="video-in-call" aria-label="通话中">
+          &#xe93b;
+        </button>
+      </div>
+      <button type="button" class="page-dock__toggle" id="page-dock-toggle" aria-expanded="true" aria-controls="page-dock-fabs" aria-label="Collapse screen navigation">
+        <span class="page-dock__toggle-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" focusable="false">
+            <path d="M3.25 5.25 L7 8.75 L10.75 5.25" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </span>
+      </button>
+    </nav>
+
+  </main>
+
+  <!-- Connecting dialing Lottie — embed equals loading-spinner-dots.json (avoids failed path fetch). -->
+  <script type="application/json" id="vc-connecting-lottie-data">
+{"nm":"Main Scene","h":800,"w":800,"meta":{"g":"@lottiefiles/creator@1.90.0"},"layers":[{"ty":4,"nm":"#dot03","sr":1,"st":6,"op":79,"ip":0,"ln":"dot03","hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]},"sk":{"a":0,"k":0},"p":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[501.814,439.774],"t":0},{"o":{"x":0.583,"y":0},"i":{"x":0.6,"y":1},"s":[501.814,439.774,0],"t":8,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.4,"y":0},"i":{"x":0.599,"y":1},"s":[501.814,379.774,0],"t":25,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.58,"y":1},"s":[501.814,479.774,0],"t":44,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.58,"y":1},"s":[501.814,429.774,0],"t":57,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.5,"y":1},"s":[501.814,445.774,0],"t":69,"ti":[0,0,0],"to":[0,0,0]},{"s":[501.814,439.774,0],"t":79}]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}},"shapes":[{"ty":"gr","nm":"Group 1","it":[{"ty":"sh","nm":"Path 1","d":1,"ks":{"a":0,"k":{"c":true,"i":[[0,-16.569],[16.569,0],[0,16.569],[-16.569,0]],"o":[[0,16.569],[-16.569,0],[0,-16.569],[16.569,0]],"v":[[30,0],[0,30],[-30,0],[0,-30]]}}},{"ty":"fl","nm":"Fill 1","c":{"a":0,"k":[1,1,1]},"r":1,"o":{"a":0,"k":100}},{"ty":"tr","a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[0,0]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ind":1},{"ty":4,"nm":"#dot02","sr":1,"st":3,"op":79,"ip":0,"ln":"dot02","hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]},"sk":{"a":0,"k":0},"p":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[401.814,439.774],"t":0},{"o":{"x":0.583,"y":0},"i":{"x":0.513,"y":1},"s":[401.814,439.774,0],"t":4,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.474,"y":0},"i":{"x":0.575,"y":1},"s":[401.814,379.774,0],"t":20,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.58,"y":1},"s":[401.814,479.774,0],"t":39,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.58,"y":1},"s":[401.814,429.774,0],"t":53,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.5,"y":1},"s":[401.814,445.774,0],"t":65,"ti":[0,0,0],"to":[0,0,0]},{"s":[401.814,439.774,0],"t":75}]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}},"shapes":[{"ty":"gr","nm":"Group 1","it":[{"ty":"sh","nm":"Path 1","d":1,"ks":{"a":0,"k":{"c":true,"i":[[0,-16.569],[16.569,0],[0,16.569],[-16.569,0]],"o":[[0,16.569],[-16.569,0],[0,-16.569],[16.569,0]],"v":[[30,0],[0,30],[-30,0],[0,-30]]}}},{"ty":"fl","nm":"Fill 1","c":{"a":0,"k":[1,1,1]},"r":1,"o":{"a":0,"k":100}},{"ty":"tr","a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[0,0]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ind":2},{"ty":4,"nm":"#dot01","sr":1,"st":0,"op":79,"ip":0,"ln":"dot01","hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]},"sk":{"a":0,"k":0},"p":{"a":1,"k":[{"o":{"x":0.583,"y":0},"i":{"x":0.4,"y":1},"s":[301.814,439.774],"t":0},{"o":{"x":0.7,"y":0},"i":{"x":0.599,"y":1},"s":[301.814,379.774,0],"t":15,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.58,"y":1},"s":[301.814,479.774,0],"t":35,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.58,"y":1},"s":[301.814,429.774,0],"t":49,"ti":[0,0,0],"to":[0,0,0]},{"o":{"x":0.333,"y":0},"i":{"x":0.5,"y":1},"s":[301.814,445.774,0],"t":61,"ti":[0,0,0],"to":[0,0,0]},{"s":[301.814,439.774,0],"t":71}]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}},"shapes":[{"ty":"gr","nm":"Group 1","it":[{"ty":"sh","nm":"Path 1","d":1,"ks":{"a":0,"k":{"c":true,"i":[[0,-16.569],[16.569,0],[0,16.569],[-16.569,0]],"o":[[0,16.569],[-16.569,0],[0,-16.569],[16.569,0]],"v":[[30,0],[0,30],[-30,0],[0,-30]]}}},{"ty":"fl","nm":"Fill 1","c":{"a":0,"k":[1,1,1]},"r":1,"o":{"a":0,"k":100}},{"ty":"tr","a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[0,0]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ind":3}],"v":"5.7.0","fr":60,"op":60,"ip":0,"assets":[]}
+  </script>
+
+  <!-- Three dots loading：供 #vc-joining-lottie / #vc-active-lottie 优先加载（等同 Three dots loading.json） -->
+  <script type="application/json" id="vc-active-lottie-data">
+{"nm":"Main Scene","h":17,"w":42,"meta":{"g":"@lottiefiles/creator@1.90.0"},"layers":[{"ty":4,"nm":"Left","sr":1,"st":0,"op":40,"ip":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[23.188,8.5]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[30],"t":0},{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[100],"t":15},{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[100],"t":17.5},{"s":[30],"t":30}]}},"shapes":[{"ty":"gr","nm":"Elipse 1","it":[{"ty":"el","nm":"Caminho da elipse 1","d":1,"p":{"a":0,"k":[0,0]},"s":{"a":0,"k":[7,7]}},{"ty":"fl","nm":"Preenchimento 1","c":{"a":0,"k":[1,1,1]},"r":1,"o":{"a":0,"k":100}},{"ty":"tr","a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[-13.11,0.14]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ind":1},{"ty":4,"nm":"Mid","sr":1,"st":0,"op":40,"ip":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[34.188,8.5]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[30],"t":10},{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[100],"t":20},{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[100],"t":22.5},{"s":[30],"t":35}]}},"shapes":[{"ty":"gr","nm":"Elipse 1","it":[{"ty":"el","nm":"Caminho da elipse 1","d":1,"p":{"a":0,"k":[0,0]},"s":{"a":0,"k":[7,7]}},{"ty":"fl","nm":"Preenchimento 1","c":{"a":0,"k":[1,1,1]},"r":1,"o":{"a":0,"k":100}},{"ty":"tr","a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[-13.11,0.14]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ind":2},{"ty":4,"nm":"Right","sr":1,"st":0,"op":40,"ip":0,"hasMask":false,"ao":0,"ks":{"a":{"a":0,"k":[0,0,0]},"s":{"a":0,"k":[100,100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[44.812,8.5]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":1,"k":[{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[30],"t":15},{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[100],"t":25},{"o":{"x":0.167,"y":0.167},"i":{"x":0.833,"y":0.833},"s":[100],"t":27.5},{"s":[30],"t":40}]}},"shapes":[{"ty":"gr","nm":"Elipse 1","it":[{"ty":"el","nm":"Caminho da elipse 1","d":1,"p":{"a":0,"k":[0,0]},"s":{"a":0,"k":[7,7]}},{"ty":"fl","nm":"Preenchimento 1","c":{"a":0,"k":[1,1,1]},"r":1,"o":{"a":0,"k":100}},{"ty":"tr","a":{"a":0,"k":[0,0]},"s":{"a":0,"k":[100,100]},"sk":{"a":0,"k":0},"p":{"a":0,"k":[-13.11,0.14]},"r":{"a":0,"k":0},"sa":{"a":0,"k":0},"o":{"a":0,"k":100}}]}],"ind":3}],"v":"5.7.0","fr":30,"op":39,"ip":0,"assets":[]}
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    (function () {
+      var root = document.getElementById("app-screen") || document.querySelector(".screen");
+      var toggle = document.getElementById("tab-scan-toggle");
+      var sheet = document.getElementById("plantaid-action-sheet");
+      var backdrop = document.getElementById("action-sheet-backdrop");
+      var pageGarden = document.getElementById("page-garden");
+      var pageVideo = document.getElementById("page-video-call");
+      var vcHang = document.getElementById("vc-hangup");
+      var vcDismiss = document.getElementById("vc-info-dismiss");
+      var vcInfo = document.getElementById("vc-info-card");
+      var vcRing = document.getElementById("vc-ring-audio");
+      var vcEndCall = document.getElementById("vc-end-call-audio");
+      var vcActiveLottieAnim = null;
+      var vcConnectingLottieAnim = null;
+      var vcJoiningLottieAnim = null;
+      var vcConnectTimer = null;
+      var vcJoinBufferTimer = null;
+      var vcTimerInterval = null;
+      var vcTypewriterTimer = null;
+      var vcSpeechChainTimer = null;
+      var VC_DOCTOR_PART1 = "Hi! I'm your plant doctor.";
+      var VC_DOCTOR_PART2 = " Let's take a look at your plant and see how it's doing!";
+      var VC_PROCESSING_MESSAGE = VC_DOCTOR_PART1 + VC_DOCTOR_PART2;
+      var VC_USER_MESSAGE =
+        "Hello, doctor. I don't have any plants with me right now.";
+      var VC_DOCTOR_ROUND2 =
+        "That's okay—we can still cover watering, light, and how to spot common issues so you're ready when you bring one home.";
+      var VC_USER_ROUND2 =
+        "Great. Could we start with how often I should water a peace lily indoors?";
+      var VC_CAMERA_BG_FRONT = "assets/video-call-active-bg.jpg";
+      var VC_CAMERA_BG_BACK = "assets/vc-camera-flipped-bg.png";
+
+      /**
+       * 视频通话 · 事件 ↔ 资源（规格表）
+       *
+       * | 事件 | 资源 |
+       * | 拨打中 loading | Loading Spinner (Dots).json → #vc-connecting-lottie-data 内嵌优先，否则 VC_LOTTIE_DIALING_PATH（#vc-connecting-lottie） |
+       * | 拨打中 BGM | asset id 1 → #vc-ring-audio[data-vc-bgm-id="1"] |
+       * | 挂断 BGM | asset id 2 → #vc-end-call-audio[data-vc-bgm-id="2"] |
+       * | 视频字幕加载中 loading | Three dots loading.json → #vc-active-lottie-data 内嵌优先，否则 VC_LOTTIE_SUBTITLES_LOADING_PATH（#vc-joining-lottie · #vc-active-lottie） |
+       */
+      var VC_LOTTIE_DIALING_PATH = "assets/loading-spinner-dots.json";
+      var VC_LOTTIE_SUBTITLES_LOADING_PATH = "assets/three-dots-loading.json";
+
+      function syncVcCameraBg() {
+        if (!pageVideo) return;
+        var back = pageVideo.dataset.vcCamera === "back";
+        var src = back ? VC_CAMERA_BG_BACK : VC_CAMERA_BG_FRONT;
+        pageVideo
+          .querySelectorAll(".vc-phase--joining .vc-active-bg img, .vc-phase--active .vc-active-bg img")
+          .forEach(function (img) {
+            if (img && img.getAttribute("src") !== src) img.setAttribute("src", src);
+          });
+      }
+
+      function toggleVcCameraFacing() {
+        if (!pageVideo) return;
+        pageVideo.dataset.vcCamera = pageVideo.dataset.vcCamera === "back" ? "front" : "back";
+        syncVcCameraBg();
+      }
+
+      function hideVcFocusFrames() {
+        if (!pageVideo) return;
+        pageVideo.querySelectorAll(".vc-focus-frame").forEach(function (el) {
+          el.classList.remove("vc-focus-frame--visible");
+        });
+      }
+
+      function placeVcFocusFrame(hitLayer, clientX, clientY) {
+        var phase = hitLayer.closest(".vc-phase");
+        var frame = hitLayer.querySelector(".vc-focus-frame");
+        if (!phase || !frame) return;
+        var rect = phase.getBoundingClientRect();
+        var x = clientX - rect.left;
+        var y = clientY - rect.top;
+        var size = 64;
+        var half = size / 2;
+        x = Math.max(half, Math.min(rect.width - half, x));
+        y = Math.max(half, Math.min(rect.height - half, y));
+        frame.classList.remove("vc-focus-frame--visible");
+        frame.offsetWidth;
+        frame.style.left = x - half + "px";
+        frame.style.top = y - half + "px";
+        requestAnimationFrame(function () {
+          frame.classList.add("vc-focus-frame--visible");
+        });
+      }
+
+      function delayVcSpeech(ms, fn) {
+        if (vcSpeechChainTimer) clearTimeout(vcSpeechChainTimer);
+        vcSpeechChainTimer = setTimeout(function () {
+          vcSpeechChainTimer = null;
+          fn();
+        }, ms);
+      }
+
+      function setVcCallUi(mode) {
+        var pv = document.getElementById("page-video-call");
+        if (!pv) return;
+        pv.dataset.vcCallUi = mode;
+      }
+
+      function setVcVoiceHintVisible(on) {
+        var el = document.getElementById("vc-voice-hint");
+        if (!el) return;
+        el.classList.toggle("vc-voice-hint--visible", !!on);
+        el.setAttribute("aria-hidden", on ? "false" : "true");
+        if (on) setVcCallUi("listening");
+      }
+      var pageDock = document.getElementById("page-dock");
+      var dockToggle = document.getElementById("page-dock-toggle");
+      if (!root || !toggle || !sheet || !backdrop || !pageGarden || !pageVideo) return;
+
+      var dockBtns = root.querySelectorAll(".page-dock__fab");
+
+      function syncDockCollapsedAria() {
+        if (!pageDock || !dockToggle) return;
+        var collapsed = pageDock.classList.contains("page-dock--collapsed");
+        dockToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        dockToggle.setAttribute(
+          "aria-label",
+          collapsed ? "Expand screen navigation" : "Collapse screen navigation",
+        );
+      }
+
+      function parseVcConnectingLottieData() {
+        var tag = document.getElementById("vc-connecting-lottie-data");
+        if (!tag || !tag.textContent) return null;
+        try {
+          return JSON.parse(tag.textContent.trim());
+        } catch (ignore) {
+          return null;
+        }
+      }
+
+      function parseVcActiveLottieData() {
+        var tag = document.getElementById("vc-active-lottie-data");
+        if (!tag || !tag.textContent) return null;
+        try {
+          return JSON.parse(tag.textContent.trim());
+        } catch (ignore) {
+          return null;
+        }
+      }
+
+      function ensureVcActiveLottie(onReady) {
+        if (typeof lottie === "undefined") return;
+        var el = document.getElementById("vc-active-lottie");
+        if (!el) return;
+        function fire(a) {
+          if (typeof onReady === "function") onReady(a);
+        }
+        if (vcActiveLottieAnim) {
+          fire(vcActiveLottieAnim);
+          return;
+        }
+        var animationData = parseVcActiveLottieData();
+        var opts = {
+          container: el,
+          renderer: "svg",
+          loop: true,
+          autoplay: false,
+        };
+        if (animationData) opts.animationData = animationData;
+        else opts.path = VC_LOTTIE_SUBTITLES_LOADING_PATH;
+        try {
+          vcActiveLottieAnim = lottie.loadAnimation(opts);
+          vcActiveLottieAnim.addEventListener("DOMLoaded", function () {
+            fire(vcActiveLottieAnim);
+          });
+        } catch (ignore) {
+          vcActiveLottieAnim = null;
+        }
+      }
+
+      function ensureVcConnectingLottie(onReady) {
+        if (typeof lottie === "undefined") return;
+        var el = document.getElementById("vc-connecting-lottie");
+        if (!el) return;
+        function fire(a) {
+          if (typeof onReady === "function") onReady(a);
+        }
+        if (vcConnectingLottieAnim) {
+          fire(vcConnectingLottieAnim);
+          return;
+        }
+        var animationData = parseVcConnectingLottieData();
+        var opts = {
+          container: el,
+          renderer: "svg",
+          loop: true,
+          autoplay: false,
+        };
+        if (animationData) opts.animationData = animationData;
+        else opts.path = VC_LOTTIE_DIALING_PATH;
+        try {
+          vcConnectingLottieAnim = lottie.loadAnimation(opts);
+          vcConnectingLottieAnim.addEventListener("DOMLoaded", function () {
+            fire(vcConnectingLottieAnim);
+          });
+        } catch (ignore) {
+          vcConnectingLottieAnim = null;
+        }
+      }
+
+      function ensureVcJoiningLottie(onReady) {
+        if (typeof lottie === "undefined") return;
+        var el = document.getElementById("vc-joining-lottie");
+        if (!el) return;
+        function fire(a) {
+          if (typeof onReady === "function") onReady(a);
+        }
+        if (vcJoiningLottieAnim) {
+          fire(vcJoiningLottieAnim);
+          return;
+        }
+        var animationData = parseVcActiveLottieData();
+        var opts = {
+          container: el,
+          renderer: "svg",
+          loop: true,
+          autoplay: false,
+        };
+        if (animationData) opts.animationData = animationData;
+        else opts.path = VC_LOTTIE_SUBTITLES_LOADING_PATH;
+        try {
+          vcJoiningLottieAnim = lottie.loadAnimation(opts);
+          vcJoiningLottieAnim.addEventListener("DOMLoaded", function () {
+            fire(vcJoiningLottieAnim);
+          });
+        } catch (ignore) {
+          vcJoiningLottieAnim = null;
+        }
+      }
+
+      function stopVcCallTimer() {
+        if (vcTimerInterval) clearInterval(vcTimerInterval);
+        vcTimerInterval = null;
+      }
+
+      function prefersReducedMotion() {
+        try {
+          return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        } catch (ignore) {
+          return false;
+        }
+      }
+
+      function scrollVcProcessingToBottom() {
+        var wrap = document.getElementById("vc-processing-text-wrap");
+        if (!wrap) return;
+        wrap.scrollTop = wrap.scrollHeight;
+      }
+
+      function stopVcTypewriter() {
+        if (vcSpeechChainTimer) clearTimeout(vcSpeechChainTimer);
+        vcSpeechChainTimer = null;
+        if (vcTypewriterTimer) clearInterval(vcTypewriterTimer);
+        vcTypewriterTimer = null;
+        var tw = document.getElementById("vc-processing-typewriter");
+        var wrap = document.getElementById("vc-processing-text-wrap");
+        if (tw) tw.textContent = "";
+        if (wrap) wrap.scrollTop = 0;
+      }
+
+      function setVcSpeechSpeaker(speaker) {
+        var card = document.getElementById("vc-processing-card");
+        var lottieHost = document.getElementById("vc-active-lottie");
+        if (!card) return;
+        card.dataset.speaker = speaker;
+        if (pageVideo) pageVideo.dataset.vcSpeaker = speaker;
+        card.classList.toggle("vc-processing-card--doctor", speaker === "doctor");
+        card.classList.toggle("vc-processing-card--user", speaker === "user");
+        if (lottieHost) lottieHost.setAttribute("aria-hidden", "true");
+        if (vcActiveLottieAnim) vcActiveLottieAnim.pause();
+      }
+
+      function resetVcSpeechBubble() {
+        setVcSpeechSpeaker("doctor");
+        setVcCallUi("listening");
+      }
+
+      function setVcSubtitlesCollapsed(collapsed) {
+        if (!pageVideo) return;
+        pageVideo.dataset.vcSubtitles = collapsed ? "collapsed" : "expanded";
+        var pressed = collapsed ? "false" : "true";
+        var labelExpanded = "Hide subtitles";
+        var labelCollapsed = "Show subtitles";
+        var cc = document.getElementById("vc-cc-toggle");
+        if (cc) {
+          cc.setAttribute("aria-pressed", pressed);
+          cc.setAttribute("aria-label", collapsed ? labelCollapsed : labelExpanded);
+        }
+        var chevronBtn = document.getElementById("vc-call-minimize-leading");
+        if (chevronBtn) {
+          chevronBtn.setAttribute("aria-pressed", pressed);
+          chevronBtn.setAttribute("aria-label", collapsed ? labelCollapsed : labelExpanded);
+        }
+      }
+
+      function toggleVcSubtitlesFromNav() {
+        if (!pageVideo) return;
+        var collapsed = pageVideo.dataset.vcSubtitles !== "collapsed";
+        setVcSubtitlesCollapsed(collapsed);
+      }
+
+      function runVcBubbleTypewriter(opts) {
+        opts = opts || {};
+        var speaker = opts.speaker === "user" ? "user" : "doctor";
+        var append = !!opts.append;
+        var skipSpeaker = !!opts.skipSpeaker;
+        var msg =
+          opts.message != null
+            ? opts.message
+            : speaker === "user"
+              ? VC_USER_MESSAGE
+              : VC_PROCESSING_MESSAGE;
+        var onDone = opts.onDone;
+        var msPerChar = opts.msPerChar != null ? opts.msPerChar : 38;
+
+        if (!skipSpeaker) {
+          setVcSpeechSpeaker(speaker);
+          setVcCallUi(speaker === "user" ? "user-speaking" : "ai-speaking");
+        }
+
+        if (speaker === "user") {
+          setVcVoiceHintVisible(false);
+        } else if (speaker === "doctor" && !append) {
+          setVcVoiceHintVisible(false);
+        }
+
+        if (vcTypewriterTimer) clearInterval(vcTypewriterTimer);
+        vcTypewriterTimer = null;
+
+        var el = document.getElementById("vc-processing-typewriter");
+        if (!el) return;
+
+        var prefix = append ? el.textContent || "" : "";
+        var full = append ? prefix + msg : msg;
+
+        if (prefersReducedMotion()) {
+          el.textContent = full;
+          scrollVcProcessingToBottom();
+          if (typeof onDone === "function") onDone();
+          return;
+        }
+
+        var i = append ? prefix.length : 0;
+        vcTypewriterTimer = setInterval(function () {
+          i += 1;
+          el.textContent = full.slice(0, i);
+          scrollVcProcessingToBottom();
+          if (i >= full.length) {
+            clearInterval(vcTypewriterTimer);
+            vcTypewriterTimer = null;
+            if (typeof onDone === "function") onDone();
+          }
+        }, msPerChar);
+      }
+
+      function startVcConversationDemo() {
+        stopVcTypewriter();
+        resetVcSpeechBubble();
+        setVcSubtitlesCollapsed(false);
+        setVcVoiceHintVisible(false);
+
+        var pauseAfterDoctor = 520;
+        var pauseAfterUser = 640;
+
+        runVcBubbleTypewriter({
+          speaker: "doctor",
+          message: VC_DOCTOR_PART1,
+          onDone: function () {
+            delayVcSpeech(420, function () {
+              runVcBubbleTypewriter({
+                speaker: "doctor",
+                message: VC_DOCTOR_PART2,
+                append: true,
+                skipSpeaker: true,
+                onDone: function () {
+                  delayVcSpeech(pauseAfterDoctor, function () {
+                    setVcVoiceHintVisible(true);
+                    delayVcSpeech(pauseAfterUser, function () {
+                      runVcBubbleTypewriter({
+                        speaker: "user",
+                        message: VC_USER_MESSAGE,
+                        onDone: function () {
+                          delayVcSpeech(pauseAfterUser, function () {
+                            runVcBubbleTypewriter({
+                              speaker: "doctor",
+                              message: VC_DOCTOR_ROUND2,
+                              onDone: function () {
+                                delayVcSpeech(pauseAfterDoctor, function () {
+                                  setVcVoiceHintVisible(true);
+                                  delayVcSpeech(pauseAfterUser, function () {
+                                    runVcBubbleTypewriter({
+                                      speaker: "user",
+                                      message: VC_USER_ROUND2,
+                                    });
+                                  });
+                                });
+                              },
+                            });
+                          });
+                        },
+                      });
+                    });
+                  });
+                },
+              });
+            });
+          },
+        });
+      }
+
+      function startVcCallTimer() {
+        stopVcCallTimer();
+        var started = Date.now();
+        function tick() {
+          var el = document.getElementById("vc-call-timer");
+          if (!el) return;
+          var sec = Math.floor((Date.now() - started) / 1000);
+          var mm = Math.floor(sec / 60);
+          var ss = sec % 60;
+          el.textContent = (mm < 10 ? "0" : "") + mm + ":" + (ss < 10 ? "0" : "") + ss;
+        }
+        tick();
+        vcTimerInterval = setInterval(tick, 1000);
+      }
+
+      function isDockVideoPage(page) {
+        return page === "video-dialing" || page === "video-in-call";
+      }
+
+      function updateDockPageTitle(page) {
+        if (page === "garden") document.title = "PlantAID — My Garden";
+        else if (page === "video-dialing") document.title = "PlantAID — 拨打中";
+        else if (page === "video-in-call") document.title = "PlantAID — 通话中";
+      }
+
+      function syncVcDockSelectionFromPhase() {
+        if (!root || !pageVideo) return;
+        var ap = root.dataset.activePage;
+        if (!isDockVideoPage(ap)) return;
+        var phase = pageVideo.dataset.videoPhase || "connecting";
+        var target = phase === "connecting" ? "video-dialing" : "video-in-call";
+        if (ap === target) return;
+        root.dataset.activePage = target;
+        dockBtns.forEach(function (btn) {
+          var sel = btn.getAttribute("data-page") === target;
+          btn.classList.toggle("is-active", sel);
+          if (sel) btn.setAttribute("aria-current", "page");
+          else btn.removeAttribute("aria-current");
+        });
+        updateDockPageTitle(target);
+      }
+
+      function syncVcCallScreenContext() {
+        if (!pageVideo || !root) return;
+        var phase = pageVideo.dataset.videoPhase || "connecting";
+        var screen = phase === "connecting" ? "dialing" : "in-call";
+        pageVideo.dataset.vcScreen = screen;
+        if (isDockVideoPage(root.dataset.activePage)) root.dataset.vcCallScreen = screen;
+        else delete root.dataset.vcCallScreen;
+        syncVcDockSelectionFromPhase();
+      }
+
+      function setVideoPhase(phase) {
+        if (!pageVideo) return;
+        pageVideo.dataset.videoPhase = phase;
+        var activePhaseEl = pageVideo.querySelector(".vc-phase--active");
+        var connPhaseEl = pageVideo.querySelector(".vc-phase--connecting");
+        var joiningPhaseEl = pageVideo.querySelector(".vc-phase--joining");
+        if (activePhaseEl) activePhaseEl.setAttribute("aria-hidden", phase !== "active");
+        if (connPhaseEl) connPhaseEl.setAttribute("aria-hidden", phase !== "connecting");
+        if (joiningPhaseEl) joiningPhaseEl.setAttribute("aria-hidden", phase !== "joining");
+
+        if (phase === "active") {
+          if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
+          if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
+          if (vcRing) {
+            vcRing.pause();
+            vcRing.currentTime = 0;
+          }
+          ensureVcActiveLottie(function (anim) {
+            if (anim) anim.pause();
+          });
+          startVcCallTimer();
+        } else if (phase === "joining") {
+          if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
+          if (vcRing) {
+            vcRing.pause();
+            vcRing.currentTime = 0;
+          }
+          if (vcActiveLottieAnim) vcActiveLottieAnim.pause();
+          stopVcCallTimer();
+          stopVcTypewriter();
+          ensureVcJoiningLottie(function (anim) {
+            if (anim && pageVideo.dataset.videoPhase === "joining") anim.play();
+          });
+        } else {
+          stopVcCallTimer();
+          stopVcTypewriter();
+          if (vcActiveLottieAnim) vcActiveLottieAnim.pause();
+          if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
+          if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
+        }
+        syncVcCallScreenContext();
+      }
+
+      function advanceVcToJoining() {
+        if (!pageVideo || !isDockVideoPage(root.dataset.activePage)) return;
+        if (pageVideo.dataset.videoPhase !== "connecting") return;
+        clearTimeout(vcConnectTimer);
+        vcConnectTimer = null;
+        clearTimeout(vcJoinBufferTimer);
+        vcJoinBufferTimer = null;
+        setVideoPhase("joining");
+        vcJoinBufferTimer = setTimeout(advanceVcFromJoiningToActive, 2000);
+      }
+
+      function advanceVcFromJoiningToActive() {
+        vcJoinBufferTimer = null;
+        if (!pageVideo || !isDockVideoPage(root.dataset.activePage)) return;
+        if (pageVideo.dataset.videoPhase !== "joining") return;
+        setVideoPhase("active");
+        if (!prefersReducedMotion() && typeof navigator.vibrate === "function") {
+          try {
+            navigator.vibrate(50);
+          } catch (ignore) {}
+        }
+        startVcConversationDemo();
+      }
+
+      function vcMediaEnter() {
+        clearTimeout(vcConnectTimer);
+        vcConnectTimer = null;
+        clearTimeout(vcJoinBufferTimer);
+        vcJoinBufferTimer = null;
+        stopVcTypewriter();
+        resetVcSpeechBubble();
+        setVcSubtitlesCollapsed(false);
+        setVcVoiceHintVisible(false);
+        pageVideo.dataset.vcTorch = "off";
+        syncVcTorchButtons();
+        pageVideo.dataset.vcCamera = "front";
+        syncVcCameraBg();
+        hideVcFocusFrames();
+        setVideoPhase("connecting");
+        ensureVcConnectingLottie(function (anim) {
+          if (
+            anim &&
+            isDockVideoPage(root.dataset.activePage) &&
+            pageVideo.dataset.videoPhase === "connecting"
+          )
+            anim.play();
+        });
+        if (vcRing) {
+          vcRing.currentTime = 0;
+          var p = vcRing.play();
+          if (p && typeof p.catch === "function") p.catch(function () {});
+        }
+        vcConnectTimer = setTimeout(advanceVcToJoining, 5000);
+      }
+
+      function vcMediaEnterInCall() {
+        clearTimeout(vcConnectTimer);
+        vcConnectTimer = null;
+        clearTimeout(vcJoinBufferTimer);
+        vcJoinBufferTimer = null;
+        stopVcTypewriter();
+        resetVcSpeechBubble();
+        setVcSubtitlesCollapsed(false);
+        setVcVoiceHintVisible(false);
+        pageVideo.dataset.vcTorch = "off";
+        syncVcTorchButtons();
+        pageVideo.dataset.vcCamera = "front";
+        syncVcCameraBg();
+        hideVcFocusFrames();
+        if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
+        if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
+        if (vcRing) {
+          vcRing.pause();
+          vcRing.currentTime = 0;
+        }
+        setVideoPhase("active");
+        ensureVcActiveLottie(function (anim) {
+          if (anim) anim.pause();
+        });
+        startVcConversationDemo();
+      }
+
+      function vcMediaLeave() {
+        clearTimeout(vcConnectTimer);
+        vcConnectTimer = null;
+        clearTimeout(vcJoinBufferTimer);
+        vcJoinBufferTimer = null;
+        stopVcCallTimer();
+        stopVcTypewriter();
+        resetVcSpeechBubble();
+        setVcSubtitlesCollapsed(false);
+        setVcVoiceHintVisible(false);
+        pageVideo.dataset.vcTorch = "off";
+        syncVcTorchButtons();
+        pageVideo.dataset.vcCamera = "front";
+        syncVcCameraBg();
+        hideVcFocusFrames();
+        setVideoPhase("connecting");
+        if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
+        if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
+        if (vcRing) {
+          vcRing.pause();
+          vcRing.currentTime = 0;
+        }
+      }
+
+      function syncVcTorchButtons() {
+        if (!pageVideo) return;
+        var on = pageVideo.dataset.vcTorch === "on";
+        pageVideo.querySelectorAll(".vc-torch-btn").forEach(function (btn) {
+          btn.classList.toggle("vc-active-round-btn--torch-on", on);
+          btn.setAttribute("aria-pressed", on ? "true" : "false");
+          btn.setAttribute("aria-label", on ? "Flashlight on" : "Flashlight off");
+          btn.innerHTML = on ? "&#xe9b5;" : "&#xe9b6;";
+        });
+      }
+
+      function playVcEndCall() {
+        if (!vcEndCall) return;
+        vcEndCall.pause();
+        vcEndCall.currentTime = 0;
+        var pe = vcEndCall.play();
+        if (pe && typeof pe.catch === "function") pe.catch(function () {});
+      }
+
+      function setOpen(open) {
+        root.classList.toggle("action-sheet-open", open);
+        toggle.setAttribute("aria-expanded", open ? "true" : "false");
+        toggle.setAttribute("aria-label", open ? "Close quick actions" : "Quick actions");
+        sheet.setAttribute("aria-hidden", open ? "false" : "true");
+        backdrop.setAttribute("aria-hidden", open ? "false" : "true");
+      }
+
+      function setActivePage(page, opts) {
+        opts = opts || {};
+        if (page !== "garden" && !isDockVideoPage(page)) return;
+        var prevPage = root.dataset.activePage;
+        var videoOn = isDockVideoPage(page);
+        root.dataset.activePage = page;
+        root.dataset.videoDockActive = videoOn ? "true" : "false";
+        pageGarden.classList.toggle("is-active", page === "garden");
+        pageVideo.classList.toggle("is-active", videoOn);
+        pageGarden.setAttribute("aria-hidden", page === "garden" ? "false" : "true");
+        pageVideo.setAttribute("aria-hidden", videoOn ? "false" : "true");
+        dockBtns.forEach(function (btn) {
+          var sel = btn.getAttribute("data-page") === page;
+          btn.classList.toggle("is-active", sel);
+          if (sel) btn.setAttribute("aria-current", "page");
+          else btn.removeAttribute("aria-current");
+        });
+        setOpen(false);
+        updateDockPageTitle(page);
+        if (videoOn) {
+          if (vcInfo) vcInfo.classList.remove("vc-info--hidden");
+          if (page === "video-dialing") {
+            vcMediaEnter();
+          } else {
+            vcMediaEnterInCall();
+          }
+        } else {
+          vcMediaLeave();
+          if (isDockVideoPage(prevPage) && !opts.skipHangSound) playVcEndCall();
+        }
+        syncVcCallScreenContext();
+        syncDockCollapsedAria();
+      }
+
+      if (dockToggle && pageDock) {
+        dockToggle.addEventListener("click", function (e) {
+          e.stopPropagation();
+          pageDock.classList.toggle("page-dock--collapsed");
+          syncDockCollapsedAria();
+        });
+      }
+      syncDockCollapsedAria();
+
+      toggle.addEventListener("click", function () {
+        setOpen(!root.classList.contains("action-sheet-open"));
+      });
+
+      backdrop.addEventListener("click", function () {
+        setOpen(false);
+      });
+
+      sheet.querySelectorAll(".action-sheet-row").forEach(function (row) {
+        row.addEventListener("click", function () {
+          var nav = row.getAttribute("data-nav-page");
+          if (nav) setActivePage(nav);
+          else setOpen(false);
+        });
+      });
+
+      dockBtns.forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          setActivePage(btn.getAttribute("data-page"));
+        });
+      });
+
+      if (vcHang) {
+        vcHang.addEventListener("click", function () {
+          setActivePage("garden");
+        });
+      }
+
+      function bindVcMinimize(btn) {
+        if (!btn) return;
+        btn.addEventListener("click", function () {
+          setActivePage("garden", { skipHangSound: true });
+        });
+      }
+      bindVcMinimize(document.getElementById("vc-join-minimize-leading"));
+
+      var vcChevronSubtitles = document.getElementById("vc-call-minimize-leading");
+      if (vcChevronSubtitles && pageVideo) {
+        vcChevronSubtitles.addEventListener("click", function () {
+          toggleVcSubtitlesFromNav();
+        });
+      }
+
+      var vcJoinHang = document.getElementById("vc-join-hangup");
+      if (vcJoinHang) {
+        vcJoinHang.addEventListener("click", function () {
+          setActivePage("garden");
+        });
+      }
+
+      var vcActiveHang = document.getElementById("vc-active-hangup");
+      if (vcActiveHang) {
+        vcActiveHang.addEventListener("click", function () {
+          setActivePage("garden");
+        });
+      }
+
+      var vcSkipPill = document.getElementById("vc-connect-pill");
+      if (vcSkipPill) {
+        vcSkipPill.addEventListener("click", function () {
+          advanceVcToJoining();
+        });
+        vcSkipPill.addEventListener("keydown", function (e) {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          advanceVcToJoining();
+        });
+      }
+
+      if (vcDismiss && vcInfo) {
+        vcDismiss.addEventListener("click", function () {
+          vcInfo.classList.add("vc-info--hidden");
+        });
+      }
+
+      var vcCcToggle = document.getElementById("vc-cc-toggle");
+      if (vcCcToggle && pageVideo) {
+        vcCcToggle.addEventListener("click", function () {
+          toggleVcSubtitlesFromNav();
+        });
+      }
+
+      if (pageVideo) {
+        pageVideo.querySelectorAll(".vc-torch-btn").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            pageVideo.dataset.vcTorch = pageVideo.dataset.vcTorch === "on" ? "off" : "on";
+            syncVcTorchButtons();
+          });
+        });
+        ["vc-join-flip", "vc-active-flip"].forEach(function (flipId) {
+          var flipBtn = document.getElementById(flipId);
+          if (flipBtn)
+            flipBtn.addEventListener("click", function () {
+              toggleVcCameraFacing();
+            });
+        });
+        pageVideo.addEventListener("pointerdown", function (e) {
+          if (!e.isPrimary) return;
+          var phaseName = pageVideo.dataset.videoPhase;
+          if (phaseName !== "joining" && phaseName !== "active") return;
+          var hit = e.target.closest(".vc-focus-hit");
+          if (!hit || !pageVideo.contains(hit)) return;
+          placeVcFocusFrame(hit, e.clientX, e.clientY);
+        });
+      }
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key !== "Escape") return;
+        if (isDockVideoPage(root.dataset.activePage)) setActivePage("garden");
+        else setOpen(false);
+      });
+    })();
+  </script>
+</body>
+</html>
