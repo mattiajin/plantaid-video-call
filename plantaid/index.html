@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0d0e12" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>PlantAID — My Garden</title>
+  <title>PlantAID · My Garden</title>
   <!-- Typography: Georgia is the brand serif (ships with macOS/iOS/Windows). It is not on Google Fonts.
        Merriweather is downloaded from Google Fonts (gstatic) under SIL OFL — see fonts/merriweather/OFL.txt. -->
   <style>
@@ -630,27 +630,28 @@
       pointer-events: none;
       opacity: 0;
       visibility: hidden;
-      transform: scale(1);
+      transform: scale(1.06);
+      transition:
+        opacity 0.22s ease-out,
+        transform 0.22s ease-out,
+        visibility 0s linear 0.22s;
+    }
+
+    .vc-focus-frame.vc-focus-frame--no-trans {
+      transition: none !important;
     }
 
     .vc-focus-frame.vc-focus-frame--visible {
       opacity: 1;
       visibility: visible;
-      animation: vc-focus-frame-pop 0.22s ease-out both;
+      transform: scale(1);
+      transition:
+        opacity 0.22s ease-out,
+        transform 0.22s ease-out,
+        visibility 0s linear 0s;
     }
 
-    @keyframes vc-focus-frame-pop {
-      from {
-        opacity: 0;
-        transform: scale(1.06);
-      }
-
-      to {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-
+    /* 重设位置时由脚本加 .vc-focus-frame--no-trans，避免先播一次淡出 */
     .vc-active-grad-top {
       position: absolute;
       left: 0;
@@ -997,19 +998,21 @@
 
     .vc-processing-card--doctor .vc-processing-typewriter {
       color: var(--wt100);
+      font-weight: 590;
     }
 
     .vc-processing-card--user .vc-processing-typewriter {
       color: var(--bk80);
-      font-weight: 700;
+      font-weight: 590;
     }
 
     /*
      * Listening：字幕常驻，弱化气泡以便区分「谁在开口」。
      *
      * 文案归属 ↔ 气泡样式（prototype）：
+     * · PlantAid/Label/18：AI / 用户字幕字重均为 590（Semibold · SF Pro）— listening 仅以底色与字色弱化，不加粗到新档
      * · AI 字幕 + ai-speaking → --doctor → chief20 / wt100 字色（Plant Doctor 在说）
-     * · AI 字幕 + listening + data-vc-voice-hint=visible（「Please start speaking」）→ --doctor → 仍为 chief20；
+     * · AI 字幕 + listening + data-vc-voice-hint=visible（「Please start speaking.」）→ --doctor → 仍为 chief20；
      *   上方仍是 AI 收尾字幕，禁用 listening 默认给 doctor 叠的浅白底。
      * · AI 字幕 + listening + hint hidden → --doctor → rgba 白叠层（空闲弱化）
      * · 用户字幕 + user-speaking → --user → wt40glass / bk80 字色
@@ -1049,8 +1052,8 @@
     }
 
     /*
-     * 同槽 · active：listening 语音提示 — 与 joining「Connecting…」同一套 vc-hint-caption-fade-io
-     * 演示脚本 delay 仍为 2400ms（一周）+ 2600ms 停留 ≈ 5s，再切用户字幕
+     * 同槽 · active：listening 语音提示 — 与 joining「Connecting…」同一套 vc-hint-caption-fade-io；
+     * 演示：全英文对话 · 开场后接不健康植物分支；医生长答后语音提示，再用户收尾
      */
     .vc-voice-hint {
       opacity: 0;
@@ -1067,6 +1070,54 @@
       animation: none !important;
       opacity: 0;
       visibility: hidden;
+    }
+
+    /* Hide listening pulse while analyzing (Figma 8543:11295) */
+    #page-video-call[data-vc-analyzing="true"] .vc-voice-hint {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      animation: none !important;
+    }
+
+    /*
+     * Doctor analyzing caption · PlantAid/Title/20 — Figma 8543:11295 (M3.0.1_Scanning · bottom serif line)
+     * Static copy (no fade-io loop unlike Connecting…)
+     */
+    .vc-doctor-analyzing-caption {
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.28s ease,
+        visibility 0s linear 0.28s;
+    }
+
+    #page-video-call[data-vc-analyzing="true"]
+      .vc-phase--active:not([aria-hidden="true"])
+      .vc-doctor-analyzing-caption {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.28s ease,
+        visibility 0s linear 0s;
+    }
+
+    /* Top subtitle card · three-dot lane like frame 8543:11295 (#vc-active-lottie beside empty lane) */
+    #vc-processing-card.vc-processing-card--doctor.vc-processing-card--analyzing .vc-active-lottie-host {
+      display: flex !important;
+      align-self: center;
+      align-items: center;
+      justify-content: flex-start;
+    }
+
+    #vc-processing-card.vc-processing-card--doctor.vc-processing-card--analyzing .vc-processing-text-wrap {
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      height: calc(18px * 1.4);
+      opacity: 0;
+      visibility: hidden;
+      overflow: hidden;
+      pointer-events: none;
     }
 
     .vc-active-lottie-host {
@@ -1195,8 +1246,16 @@
         transition-duration: 0.01ms;
       }
 
-      .vc-focus-frame.vc-focus-frame--visible {
-        animation: none;
+      .vc-focus-frame {
+        transition-duration: 0.01ms !important;
+      }
+
+      .vc-focus-frame.vc-focus-frame--no-trans {
+        transition: none !important;
+      }
+
+      .vc-doctor-analyzing-caption {
+        transition-duration: 0.01ms !important;
       }
 
       #vc-processing-card,
@@ -3127,6 +3186,9 @@
           </div>
         </div>
         <p class="vc-call-hint vc-voice-hint" id="vc-voice-hint" aria-hidden="true">Please start speaking.</p>
+        <p class="vc-call-hint vc-doctor-analyzing-caption" id="vc-doctor-analyzing-caption" aria-hidden="true">
+          Doctor is analyzing...
+        </p>
         <div class="vc-active-controls">
           <button type="button" class="vc-active-round-btn vc-active-round-btn--danger" id="vc-active-hangup" aria-label="End call">
             &#xe92a;
@@ -3390,19 +3452,27 @@
       var vcTypewriterTimer = null;
       var vcSpeechChainTimer = null;
       var vcFocusHideTimer = null;
+      var vcAnalyzingTimer = null;
+      /** Figma 8543:11295 · “Doctor is analyzing…” after hook line (VC_DOCTOR_B_HOOK), before user follow-up */
+      var VC_DOCTOR_ANALYZING_MS = 2800;
       var vcCameraFlipTimerA = null;
       var vcCameraFlipTimerB = null;
       var SCAN_DIAGNOSE_DOT_LS_KEY = "plantaid-diagnose-scan-dot-dismissed";
       var ACTION_SHEET_VIDEO_CALL_BADGE_LS_KEY = "plantaid-action-sheet-video-call-badge-dismissed";
-      var VC_DOCTOR_PART1 = "Hi! I'm your plant doctor.";
-      var VC_DOCTOR_PART2 = " Let's take a look at your plant and see how it's doing!";
-      var VC_PROCESSING_MESSAGE = VC_DOCTOR_PART1 + VC_DOCTOR_PART2;
-      var VC_USER_MESSAGE =
-        "Hello, doctor. I don't have any plants with me right now.";
-      var VC_DOCTOR_ROUND2 =
-        "That's okay—we can still cover watering, light, and how to spot common issues so you're ready when you bring one home.";
-      var VC_USER_ROUND2 =
-        "Great. Could we start with how often I should water a peace lily indoors?";
+      /* Demo: all-English dialogue · intro → concern → unhealthy-plant branch → hint → add-to-garden close */
+      var VC_DOCTOR_INTRO_EN_1 = "Hi! I'm your plant doctor.";
+      var VC_DOCTOR_INTRO_EN_2 = " Let's take a look at your plant and see how it's doing!";
+      var VC_USER_CONCERN =
+        "Hi doctor. My peace lily has been getting more yellow leaves lately, and the soil feels like it stays wet for too long.";
+      var VC_DOCTOR_B_HOOK = "Hmm, something's off. Your plant might be running into a few of these issues.";
+      var VC_USER_FOLLOWUP = "How serious is it? What should I do to help it recover?";
+      var VC_DOCTOR_B_ADVICE =
+        "Most likely it's from overwatering and not enough airflow, and it's progressed enough that we should take it seriously. Here's what usually helps it bounce back: first, trim any affected leaves; second, improve ventilation around the pot; and lastly, keep up a regular spray routine. Do you have any questions, or would you like more detailed steps?";
+      var VC_USER_WRAP = "I'm good for now. I'll follow your plan and see how it goes.";
+      var VC_USER_MESSAGE = VC_USER_WRAP;
+      var VC_DOCTOR_CLOSING =
+        "Alright, we'll leave it here for today. After you hang up, you can add it to your garden.";
+      var VC_PROCESSING_MESSAGE = VC_DOCTOR_INTRO_EN_1 + VC_DOCTOR_INTRO_EN_2;
       var VC_CAMERA_BG_FRONT = "assets/video-call-active-bg.jpg";
       var VC_CAMERA_BG_BACK = "assets/vc-camera-selfie-bg.jpg";
       /** Half of flip animation; keep in sync with CSS keyframes duration (420ms). */
@@ -3500,10 +3570,12 @@
         var half = size / 2;
         x = Math.max(half, Math.min(rect.width - half, x));
         y = Math.max(half, Math.min(rect.height - half, y));
+        frame.classList.add("vc-focus-frame--no-trans");
         frame.classList.remove("vc-focus-frame--visible");
-        frame.offsetWidth;
+        void frame.offsetWidth;
         frame.style.left = x - half + "px";
         frame.style.top = y - half + "px";
+        frame.classList.remove("vc-focus-frame--no-trans");
         requestAnimationFrame(function () {
           frame.classList.add("vc-focus-frame--visible");
           vcFocusHideTimer = setTimeout(function () {
@@ -3965,6 +4037,53 @@
         }, msPerChar);
       }
 
+      function setVcDoctorAnalyzing(on) {
+        if (!pageVideo) return;
+        var card = document.getElementById("vc-processing-card");
+        var cap = document.getElementById("vc-doctor-analyzing-caption");
+        if (on) {
+          pageVideo.setAttribute("data-vc-analyzing", "true");
+          setVcVoiceHintVisible(false);
+          if (card) card.classList.add("vc-processing-card--analyzing");
+          if (cap) cap.setAttribute("aria-hidden", "false");
+        } else {
+          pageVideo.removeAttribute("data-vc-analyzing");
+          if (card) card.classList.remove("vc-processing-card--analyzing");
+          if (cap) cap.setAttribute("aria-hidden", "true");
+          ensureVcActiveLottie(function (anim) {
+            if (anim) anim.pause();
+          });
+        }
+      }
+
+      /**
+       * Figma 8543:11295 · after “few issues…” line — analyzing overlay (+ top Lottie), then onAfter().
+       */
+      function runVcDoctorAnalyzingSegmentThen(onAfter) {
+        if (!pageVideo || pageVideo.dataset.videoPhase !== "active") {
+          if (typeof onAfter === "function") onAfter();
+          return;
+        }
+        if (vcAnalyzingTimer) {
+          clearTimeout(vcAnalyzingTimer);
+          vcAnalyzingTimer = null;
+        }
+        stopVcTypewriter();
+        setVcDoctorAnalyzing(true);
+        ensureVcActiveLottie(function (anim) {
+          if (anim && pageVideo.getAttribute("data-vc-analyzing") === "true") {
+            anim.play();
+          }
+        });
+        var ms = prefersReducedMotion() ? 500 : VC_DOCTOR_ANALYZING_MS;
+        vcAnalyzingTimer = setTimeout(function () {
+          vcAnalyzingTimer = null;
+          if (!pageVideo || pageVideo.dataset.videoPhase !== "active") return;
+          setVcDoctorAnalyzing(false);
+          if (typeof onAfter === "function") onAfter();
+        }, ms);
+      }
+
       function startVcConversationDemo() {
         stopVcTypewriter();
         resetVcSpeechBubble();
@@ -3973,44 +4092,83 @@
 
         var pauseAfterDoctor = 520;
         var pauseAfterUser = 640;
-        /** 首轮：语音提示与 joining「Connecting…」同周期 2.4s × 一周后 + ~2.6s 再打字 */
+        var pauseBetweenEnParts = 420;
+        /** 与 joining「Connecting…」同 2.4s 呼吸周期 + 停留，再出用户回应（沿用原演示节奏） */
         var vcVoiceHintPulseMs = 2400;
-        var pauseSpeakHintFirstHoldMs = 2600;
+        var pauseSpeakHintHoldMs = 2600;
 
         runVcBubbleTypewriter({
           speaker: "doctor",
-          message: VC_DOCTOR_PART1,
+          message: VC_DOCTOR_INTRO_EN_1,
+          msPerChar: 32,
           onDone: function () {
-            delayVcSpeech(420, function () {
+            delayVcSpeech(pauseBetweenEnParts, function () {
               runVcBubbleTypewriter({
                 speaker: "doctor",
-                message: VC_DOCTOR_PART2,
+                message: VC_DOCTOR_INTRO_EN_2,
                 append: true,
                 skipSpeaker: true,
                 onDone: function () {
                   delayVcSpeech(pauseAfterDoctor, function () {
-                    setVcVoiceHintVisible(true);
-                    delayVcSpeech(vcVoiceHintPulseMs + pauseSpeakHintFirstHoldMs, function () {
-                      runVcBubbleTypewriter({
-                        speaker: "user",
-                        message: VC_USER_MESSAGE,
-                        onDone: function () {
-                          delayVcSpeech(pauseAfterUser, function () {
-                            runVcBubbleTypewriter({
-                              speaker: "doctor",
-                              message: VC_DOCTOR_ROUND2,
-                              onDone: function () {
-                                delayVcSpeech(pauseAfterUser, function () {
-                                  runVcBubbleTypewriter({
-                                    speaker: "user",
-                                    message: VC_USER_ROUND2,
+                    runVcBubbleTypewriter({
+                      speaker: "user",
+                      message: VC_USER_CONCERN,
+                      msPerChar: 28,
+                      onDone: function () {
+                        delayVcSpeech(pauseAfterUser, function () {
+                          runVcBubbleTypewriter({
+                            speaker: "doctor",
+                            message: VC_DOCTOR_B_HOOK,
+                            msPerChar: 30,
+                            onDone: function () {
+                              delayVcSpeech(pauseAfterDoctor, function () {
+                                runVcDoctorAnalyzingSegmentThen(function () {
+                                  delayVcSpeech(pauseAfterDoctor, function () {
+                                    runVcBubbleTypewriter({
+                                      speaker: "user",
+                                      message: VC_USER_FOLLOWUP,
+                                      msPerChar: 28,
+                                      onDone: function () {
+                                        delayVcSpeech(pauseAfterUser, function () {
+                                          runVcBubbleTypewriter({
+                                            speaker: "doctor",
+                                            message: VC_DOCTOR_B_ADVICE,
+                                            msPerChar: 22,
+                                            onDone: function () {
+                                              delayVcSpeech(pauseAfterDoctor, function () {
+                                                setVcVoiceHintVisible(true);
+                                                delayVcSpeech(
+                                                  vcVoiceHintPulseMs + pauseSpeakHintHoldMs,
+                                                  function () {
+                                                    runVcBubbleTypewriter({
+                                                      speaker: "user",
+                                                      message: VC_USER_WRAP,
+                                                      msPerChar: 28,
+                                                      onDone: function () {
+                                                        delayVcSpeech(pauseAfterUser, function () {
+                                                          runVcBubbleTypewriter({
+                                                            speaker: "doctor",
+                                                            message: VC_DOCTOR_CLOSING,
+                                                            msPerChar: 28,
+                                                          });
+                                                        });
+                                                      },
+                                                    });
+                                                  },
+                                                );
+                                              });
+                                            },
+                                          });
+                                        });
+                                      },
+                                    });
                                   });
                                 });
-                              },
-                            });
+                              });
+                            },
                           });
-                        },
-                      });
+                        });
+                      },
                     });
                   });
                 },
@@ -4040,10 +4198,10 @@
       }
 
       function updateDockPageTitle(page) {
-        if (page === "garden") document.title = "PlantAID — My Garden";
-        else if (page === "add-garden") document.title = "PlantAID — Add To Garden";
-        else if (page === "video-dialing") document.title = "PlantAID — 拨打中";
-        else if (page === "video-in-call") document.title = "PlantAID — 通话中";
+        if (page === "garden") document.title = "PlantAID · My Garden";
+        else if (page === "add-garden") document.title = "PlantAID · Add To Garden";
+        else if (page === "video-dialing") document.title = "PlantAID · 拨打中";
+        else if (page === "video-in-call") document.title = "PlantAID · 通话中";
       }
 
       function syncVcDockSelectionFromPhase() {
@@ -4084,6 +4242,11 @@
         if (joiningPhaseEl) joiningPhaseEl.setAttribute("aria-hidden", phase !== "joining");
 
         if (phase === "active") {
+          if (!prefersReducedMotion() && typeof navigator.vibrate === "function") {
+            try {
+              navigator.vibrate(50);
+            } catch (ignore) {}
+          }
           if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
           if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
           if (vcRing) {
@@ -4133,11 +4296,6 @@
         if (!pageVideo || !isDockVideoPage(root.dataset.activePage)) return;
         if (pageVideo.dataset.videoPhase !== "joining") return;
         setVideoPhase("active");
-        if (!prefersReducedMotion() && typeof navigator.vibrate === "function") {
-          try {
-            navigator.vibrate(50);
-          } catch (ignore) {}
-        }
         startVcConversationDemo();
       }
 
@@ -4146,6 +4304,11 @@
         vcConnectTimer = null;
         clearTimeout(vcJoinBufferTimer);
         vcJoinBufferTimer = null;
+        if (vcAnalyzingTimer) {
+          clearTimeout(vcAnalyzingTimer);
+          vcAnalyzingTimer = null;
+        }
+        setVcDoctorAnalyzing(false);
         stopVcTypewriter();
         resetVcSpeechBubble();
         setVcSubtitlesCollapsed(false);
@@ -4165,6 +4328,11 @@
         vcConnectTimer = null;
         clearTimeout(vcJoinBufferTimer);
         vcJoinBufferTimer = null;
+        if (vcAnalyzingTimer) {
+          clearTimeout(vcAnalyzingTimer);
+          vcAnalyzingTimer = null;
+        }
+        setVcDoctorAnalyzing(false);
         stopVcTypewriter();
         resetVcSpeechBubble();
         setVcSubtitlesCollapsed(false);
@@ -4182,9 +4350,6 @@
           vcRing.currentTime = 0;
         }
         setVideoPhase("active");
-        ensureVcActiveLottie(function (anim) {
-          if (anim) anim.pause();
-        });
         startVcConversationDemo();
       }
 
@@ -4193,6 +4358,11 @@
         vcConnectTimer = null;
         clearTimeout(vcJoinBufferTimer);
         vcJoinBufferTimer = null;
+        if (vcAnalyzingTimer) {
+          clearTimeout(vcAnalyzingTimer);
+          vcAnalyzingTimer = null;
+        }
+        setVcDoctorAnalyzing(false);
         stopVcCallTimer();
         stopVcTypewriter();
         resetVcSpeechBubble();

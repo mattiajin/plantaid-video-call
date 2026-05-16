@@ -22,7 +22,7 @@
 | §19 | 左侧 Dock（收起 / 折叠箭头 / FAB hover） |
 | §20 | Video · 拨打界面 vs 接通界面 `.vc-call-screen` 图层过渡 |
 | §21 | Video · 翻转相机（`rotateY` keyframes + 根节点 class） |
-| §22 | Video · 点按对焦框 `vc-focus-frame-pop` |
+| §22 | Video · 点按对焦框（opacity / scale 淡入淡出） |
 | §23 | Video · 底部标题淡入淡出 `vc-hint-caption-fade-io` |
 | §24 | Identified sheet + Add To Garden 页面上滑 / 遮罩 |
 | §25 | 脚本交互索引 |
@@ -362,15 +362,17 @@ Video 相关另有 `.vc-phase`、Connecting 胶囊、`vc-info`、**§20–§24**
 
 ---
 
-## 22. Video · 点按对焦框 **`vc-focus-frame-pop`**
+## 22. Video · 点按对焦框（淡入 · 淡出）
 
 **元素**：每层 **`.vc-focus-hit`** 内的 **`.vc-focus-frame`**。
 
-**触发**：点击命中层 → **`vc-focus-frame--visible`** · **`animation: vc-focus-frame-pop 0.22s ease-out both`**。
+**出现 / 消失**：**`transition`** — **`opacity`** 与 **`transform`（`scale(1.06)` ↔ `scale(1)`）** 各 **0.22s** `ease-out`；隐藏时 **`visibility`** 在 **0.22s** 后再切为 **`hidden`**（与「出现」对称的淡出）。
 
-**`@keyframes vc-focus-frame-pop`**：**`from`** `opacity: 0`，`transform: scale(1.06)` → **`to`** `opacity: 1`，`scale(1)`。
+**触发**：点击命中层 → **`vc-focus-frame--visible`**；约 **1s** 后移除该类 → 同上过渡淡出。
 
-**`prefers-reduced-motion`**：可见态 **`animation: none`**（瞬时出现）。
+**重设坐标**（连点另一处）：脚本为 **`vc-focus-frame--no-trans`**，**`transition: none`** 后瞬时去掉 **`--visible`**、改 **`left/top`**，再移除 **`--no-trans`** 并加回 **`--visible`**，避免在未移动前先播一次淡出。
+
+**`prefers-reduced-motion`**：**`transition-duration: 0.01ms`**（接近瞬时）。
 
 ---
 
