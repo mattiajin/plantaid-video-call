@@ -2,7 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <meta name="theme-color" content="#0d0e12" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>PlantAID — My Garden</title>
   <!-- Typography: Georgia is the brand serif (ships with macOS/iOS/Windows). It is not on Google Fonts.
        Merriweather is downloaded from Google Fonts (gstatic) under SIL OFL — see fonts/merriweather/OFL.txt. -->
@@ -58,8 +64,13 @@
       --wt40glass: rgba(255, 255, 255, 0.4);
       --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
         "Segoe UI", sans-serif;
+      /* Figma PlantAID 8601 — supporting fills */
       /* Brand: Georgia first; Merriweather when Georgia is unavailable (e.g. many Linux desktops) */
       --font-title: Georgia, Merriweather, "Times New Roman", serif;
+      /* PlantAID · func brand 5 — input fill (8601:16889) */
+      --func-brand5: rgba(31, 98, 70, 0.05);
+      /* Diagnose Again secondary label (8629:9579 bg/100 in Dev) */
+      --text-bg100: #313131;
     }
 
     * {
@@ -248,6 +259,32 @@
       outline: 2px solid rgba(255, 255, 255, 0.75);
       outline-offset: 3px;
       border-radius: 41px;
+    }
+
+    @keyframes vc-connect-pill-pulse {
+      0%,
+      100% {
+        opacity: 1;
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      50% {
+        opacity: 0.55;
+        border-color: rgba(255, 255, 255, 0.42);
+      }
+    }
+
+    /* 仅在 Connecting 阶段闪烁，提示拨打中（离开 phase 后自动无动画） */
+    .vc-phase--connecting:not([aria-hidden="true"]) .vc-connect-pill {
+      animation: vc-connect-pill-pulse 1.2s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vc-phase--connecting .vc-connect-pill {
+        animation: none !important;
+        opacity: 1;
+        border-color: rgba(255, 255, 255, 0.2);
+      }
     }
 
     /* Connecting · Lottie plate — Figma 8543:10386 · 140×140 @ top 240px */
@@ -523,6 +560,7 @@
       inset: 0;
       overflow: hidden;
       border-radius: 20px;
+      perspective: 1200px;
     }
 
     .vc-active-bg img {
@@ -530,6 +568,48 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      transform-origin: center center;
+      backface-visibility: hidden;
+    }
+
+    /*
+     * Flip camera · rotateY swap at 90° edge-on (half duration matches VC_CAMERA_FLIP_HALF_MS in script).
+     */
+    #page-video-call.vc-camera-flip-out .vc-phase--joining .vc-active-bg img,
+    #page-video-call.vc-camera-flip-out .vc-phase--active .vc-active-bg img {
+      animation: vc-camera-flip-out 420ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    }
+
+    #page-video-call.vc-camera-flip-in .vc-phase--joining .vc-active-bg img,
+    #page-video-call.vc-camera-flip-in .vc-phase--active .vc-active-bg img {
+      animation: vc-camera-flip-in 420ms cubic-bezier(0.45, 0, 0.55, 1) forwards;
+    }
+
+    @keyframes vc-camera-flip-out {
+      from {
+        transform: rotateY(0deg);
+      }
+      to {
+        transform: rotateY(90deg);
+      }
+    }
+
+    @keyframes vc-camera-flip-in {
+      from {
+        transform: rotateY(-90deg);
+      }
+      to {
+        transform: rotateY(0deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #page-video-call.vc-camera-flip-out .vc-phase--joining .vc-active-bg img,
+      #page-video-call.vc-camera-flip-out .vc-phase--active .vc-active-bg img,
+      #page-video-call.vc-camera-flip-in .vc-phase--joining .vc-active-bg img,
+      #page-video-call.vc-camera-flip-in .vc-phase--active .vc-active-bg img {
+        animation: none !important;
+      }
     }
 
     /* Tap-to-focus bracket · Figma 8543:11089 · border 2 solid assist4 */
@@ -644,9 +724,8 @@
       display: flex;
     }
 
-    #page-video-call[data-vc-subtitles="collapsed"] #vc-processing-card {
+    #page-video-call[data-vc-subtitles="collapsed"] .vc-phase .vc-processing-card {
       opacity: 0;
-      visibility: hidden;
       pointer-events: none;
       transform: translateX(-50%) translateY(-18px) scale(0.93);
     }
@@ -777,8 +856,8 @@
       pointer-events: none;
     }
 
-    /* PlantAid/Title/20 — Figma 8543:11274 */
-    .vc-joining-caption {
+    /* PlantAid/Title/20 — 底部提示槽：joining「Connecting…」与 active「Please…」同槽不同状态 */
+    .vc-call-hint {
       position: absolute;
       left: 50%;
       top: 668px;
@@ -796,6 +875,50 @@
       color: var(--wt100);
       pointer-events: none;
       z-index: 17;
+    }
+
+    @keyframes vc-joining-connecting-fade {
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    /* Joining buffer：Connecting… 淡入淡出循环（Figma 8543:11274） */
+    .vc-phase--joining:not([aria-hidden="true"]) .vc-joining-caption.vc-call-hint {
+      transition-property: transform, visibility;
+      animation: vc-joining-connecting-fade 2.4s ease-in-out infinite;
+    }
+
+    .vc-joining-caption {
+      opacity: 1;
+      visibility: visible;
+      transition:
+        opacity 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+        transform 0.34s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0s linear 0s;
+    }
+
+    #page-video-call[data-vc-subtitles="collapsed"] .vc-joining-caption {
+      animation: none !important;
+      opacity: 0;
+      visibility: hidden;
+      transform: translate(-50%, calc(-100% - 18px)) scale(0.93);
+      transition:
+        opacity 0.32s cubic-bezier(0.32, 0.72, 0, 1),
+        transform 0.34s cubic-bezier(0.32, 0.72, 0, 1),
+        visibility 0s linear 0.32s;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .vc-phase--joining:not([aria-hidden="true"]) .vc-joining-caption.vc-call-hint {
+        animation: none !important;
+        opacity: 1;
+      }
     }
 
     /* User speaking — Figma 8543:10834 · nt/wt/40 + white/20 stroke */
@@ -857,7 +980,19 @@
       font-weight: 700;
     }
 
-    /* Listening：字幕常驻，样式弱化以便区分「AI/用户正在说」 */
+    /*
+     * Listening：字幕常驻，弱化气泡以便区分「谁在开口」。
+     *
+     * 文案归属 ↔ 气泡样式（prototype）：
+     * · AI 字幕 + ai-speaking → --doctor → chief20 / wt100 字色（Plant Doctor 在说）
+     * · AI 字幕 + listening + data-vc-voice-hint=visible（「Please start speaking」）→ --doctor → 仍为 chief20；
+     *   上方仍是 AI 收尾字幕，禁用 listening 默认给 doctor 叠的浅白底。
+     * · AI 字幕 + listening + hint hidden → --doctor → rgba 白叠层（空闲弱化）
+     * · 用户字幕 + user-speaking → --user → wt40glass / bk80 字色
+     * · 用户字幕 + listening → --user → rgba 白叠层弱化
+     *
+     * JS：setVcVoiceHintVisible(true) 时强制 setVcSpeechSpeaker('doctor')，避免上一轮用户白气泡残留。
+     */
     #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--doctor {
       background: rgba(255, 255, 255, 0.14);
       border-color: rgba(255, 255, 255, 0.24);
@@ -865,6 +1000,18 @@
 
     #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--doctor .vc-processing-typewriter {
       color: rgba(255, 255, 255, 0.78);
+    }
+
+    /* Hint on：listening UI + CC + Doctor lane — caption copy still AI */
+    #page-video-call[data-vc-voice-hint="visible"][data-vc-call-ui="listening"]
+      #vc-processing-card.vc-processing-card--doctor {
+      background: var(--chief20);
+      border-color: var(--wt20);
+    }
+
+    #page-video-call[data-vc-voice-hint="visible"][data-vc-call-ui="listening"]
+      #vc-processing-card.vc-processing-card--doctor .vc-processing-typewriter {
+      color: var(--wt100);
     }
 
     #page-video-call[data-vc-call-ui="listening"] #vc-processing-card.vc-processing-card--user {
@@ -877,40 +1024,23 @@
       font-weight: 590;
     }
 
-    /* Figma 8543:10888 · PlantAid/Title/20 — prompt user to speak (listening state) */
+    /* 同槽 · active：listening 时出现；2s 淡入，首轮「全亮停留」与脚本 delay 对齐（淡入 + 3s） */
     .vc-voice-hint {
-      position: absolute;
-      left: 50%;
-      top: 668px;
-      transform: translate(-50%, -100%);
-      width: 375px;
-      max-width: 100%;
-      margin: 0;
-      padding: 0 28px;
-      box-sizing: border-box;
-      text-align: center;
-      font-family: var(--font-title);
-      font-weight: 700;
-      font-size: 20px;
-      line-height: 1.3;
-      color: var(--wt100);
-      pointer-events: none;
-      z-index: 17;
       opacity: 0;
       visibility: hidden;
       transition:
-        opacity 0.24s ease,
-        visibility 0.24s ease;
+        opacity 2s ease,
+        visibility 2s ease;
     }
 
     .vc-voice-hint.vc-voice-hint--visible {
+      animation: none;
       opacity: 1;
       visibility: visible;
     }
 
     #page-video-call[data-vc-subtitles="collapsed"] .vc-voice-hint.vc-voice-hint--visible {
       opacity: 0;
-      visibility: hidden;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1047,12 +1177,17 @@
         animation: none;
       }
 
-      #vc-processing-card {
+      #vc-processing-card,
+      #vc-joining-card {
         transition:
           background 0.22s ease,
           border-color 0.22s ease,
           opacity 0.01ms,
           transform 0.01ms;
+      }
+
+      .vc-joining-caption {
+        transition-duration: 0.01ms !important;
       }
 
       #vc-cc-toggle .vc-sub-toggle-icon,
@@ -1078,12 +1213,37 @@
       gap: 5px;
       padding: 6px;
       border-radius: 999px;
+      cursor: grab;
       transition:
         background 0.22s ease,
         border-color 0.22s ease,
         box-shadow 0.22s ease,
         gap 0.22s ease,
         padding 0.22s ease;
+    }
+
+    .page-dock.page-dock--pos-js {
+      transform: none;
+    }
+
+    .page-dock.page-dock--dragging {
+      cursor: grabbing;
+      transition:
+        background 0.22s ease,
+        border-color 0.22s ease,
+        box-shadow 0.22s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .page-dock .page-dock__fab,
+    .page-dock .page-dock__toggle {
+      cursor: pointer;
+    }
+
+    .page-dock.page-dock--dragging .page-dock__fab,
+    .page-dock.page-dock--dragging .page-dock__toggle {
+      cursor: grabbing;
     }
 
     .page-dock__fabs {
@@ -1105,6 +1265,10 @@
 
     .page-dock:not(.page-dock--collapsed) .page-dock__fab:nth-child(3) {
       grid-row: 3;
+    }
+
+    .page-dock:not(.page-dock--collapsed) .page-dock__fab:nth-child(4) {
+      grid-row: 4;
     }
 
     .page-dock:not(.page-dock--collapsed) .page-dock__fab {
@@ -1131,7 +1295,7 @@
       position: relative;
       opacity: 0;
       z-index: 2;
-      pointer-events: auto;
+      pointer-events: none;
     }
 
     .page-dock__toggle {
@@ -1171,28 +1335,21 @@
       align-items: center;
       justify-content: center;
       transition: transform 0.24s ease;
+      /* SVG 为 ∧（朝上）= Dock 已展开，语义「收起」 */
+      transform: rotate(0deg);
     }
 
     .page-dock__toggle-icon svg {
       display: block;
     }
 
+    /* 收起态：旋转为 ∨（朝下）= 「展开」 */
     .page-dock--collapsed .page-dock__toggle-icon {
       transform: rotate(180deg);
     }
 
-    /* Dock chevron: ongoing call — flipped vertically vs dialing (expanded ⇄ collapsed inverted). */
-    .screen[data-video-dock-active="true"][data-vc-call-screen="in-call"]
-      .page-dock:not(.page-dock--collapsed)
-      .page-dock__toggle-icon {
-      transform: rotate(180deg);
-    }
-
-    .screen[data-video-dock-active="true"][data-vc-call-screen="in-call"] .page-dock--collapsed .page-dock__toggle-icon {
-      transform: rotate(0deg);
-    }
-
-    .screen[data-active-page="garden"] .page-dock {
+    .screen[data-active-page="garden"] .page-dock,
+    .screen[data-active-page="add-garden"] .page-dock {
       background: rgba(255, 255, 255, 0.94);
       border: 1px solid rgba(13, 14, 18, 0.09);
       box-shadow: 0 10px 32px rgba(13, 14, 18, 0.14);
@@ -1227,12 +1384,38 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .screen[data-active-page="garden"] .page-dock__fab {
+    .page-dock__fab svg {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .screen[data-active-page="garden"] .page-dock__fab:not(.page-dock__fab--add-entry),
+    .screen[data-active-page="add-garden"] .page-dock__fab:not(.page-dock__fab--add-entry) {
       background: rgba(242, 245, 243, 0.98);
       color: var(--bk40);
     }
 
-    .screen[data-active-page="garden"] .page-dock__fab.is-active {
+    .screen[data-active-page="garden"] .page-dock__fab.page-dock__fab--add-entry,
+    .screen[data-active-page="add-garden"] .page-dock__fab.page-dock__fab--add-entry {
+      background: rgba(214, 234, 222, 0.95);
+      color: var(--brand);
+      box-shadow: inset 0 0 0 1.5px rgba(31, 98, 70, 0.35);
+    }
+
+    .screen[data-active-page="add-garden"] .page-dock__fab.page-dock__fab--add-entry.is-active {
+      box-shadow:
+        inset 0 0 0 1.5px rgba(31, 98, 70, 0.35),
+        0 0 0 2px rgba(31, 98, 70, 0.42);
+    }
+
+    .screen[data-video-dock-active="true"] .page-dock__fab.page-dock__fab--add-entry {
+      background: rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.92);
+      box-shadow: none;
+    }
+
+    .screen[data-active-page="garden"] .page-dock__fab.is-active,
+    .screen[data-active-page="add-garden"] .page-dock__fab.is-active {
       background: rgba(31, 98, 70, 0.14);
       color: var(--brand);
       box-shadow: 0 0 0 2px rgba(31, 98, 70, 0.42);
@@ -1253,7 +1436,8 @@
       transform: scale(1.05);
     }
 
-    .screen[data-active-page="garden"] .page-dock__toggle {
+    .screen[data-active-page="garden"] .page-dock__toggle,
+    .screen[data-active-page="add-garden"] .page-dock__toggle {
       color: rgba(13, 14, 18, 0.42);
     }
 
@@ -1262,9 +1446,13 @@
     }
 
     /* —— Quick-action sheet 8593:8051 —— */
+    /* Overlay stops above the tab bar so bottom nav stays fully opaque (not dimmed). */
     .action-sheet-backdrop {
       position: absolute;
-      inset: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 86px;
       z-index: 8;
       background: rgba(13, 14, 18, 0.28);
       opacity: 0;
@@ -1453,6 +1641,734 @@
       }
     }
 
+    .page--add-garden {
+      background: #ffffff;
+      z-index: 420;
+      color: var(--bk100);
+      transform: translateY(100%);
+      transition:
+        opacity 0.26s ease,
+        transform 0.42s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .page--add-garden.is-active {
+      transform: translateY(0);
+    }
+
+    /* —— Post–video call · identified plant sheet (Figma 8601:16480) —— */
+    .identified-sheet-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 412;
+      background: rgba(13, 14, 18, 0.48);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition:
+        opacity 0.28s ease,
+        visibility 0s linear 0.3s;
+    }
+
+    .screen.identified-sheet-open .identified-sheet-backdrop {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transition:
+        opacity 0.28s ease,
+        visibility 0s linear 0s;
+    }
+
+    .identified-plant-sheet {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, 100%);
+      bottom: 0;
+      width: 375px;
+      max-width: 100%;
+      max-height: calc(100% - 24px);
+      z-index: 413;
+      background: #ffffff;
+      border-radius: 20px 20px 0 0;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      box-shadow: 0 -18px 40px rgba(13, 14, 18, 0.18);
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 0.26s ease,
+        visibility 0s linear 0.42s;
+    }
+
+    .screen.identified-sheet-open .identified-plant-sheet {
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+      opacity: 1;
+      visibility: visible;
+      transition:
+        transform 0.42s cubic-bezier(0.32, 0.72, 0, 1),
+        opacity 0.24s ease,
+        visibility 0s linear 0s;
+    }
+
+    /* Spec: 底板顶 → 配图顶 40px；配图底 → 首行文案顶 20px —— dismiss 不占流式高度（Figma 8601） */
+    .identified-plant-sheet__dismiss-row {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      padding: 14px 20px;
+      box-sizing: border-box;
+      display: flex;
+      align-items: flex-start;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .identified-plant-sheet__dismiss-row .identified-plant-sheet__close {
+      pointer-events: auto;
+    }
+
+    .identified-plant-sheet__scroll {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-top: 40px;
+    }
+
+    .identified-plant-sheet__main {
+      width: 294px;
+      max-width: calc(100% - 48px);
+      margin: 0 auto;
+      padding: 0 0 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .identified-plant-sheet__close {
+      width: 40px;
+      height: 40px;
+      border-radius: 23px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--bk40);
+      letter-spacing: 0.48px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Figma 8601:16512 — PNG already includes organic silhouette + alpha */
+    .identified-plant-sheet__plant-photo {
+      display: block;
+      flex-shrink: 0;
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+    }
+
+    .identified-plant-sheet__copy {
+      text-align: center;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .identified-plant-sheet__lead {
+      font-weight: 590;
+      font-size: 18px;
+      line-height: 1.4;
+      color: var(--bk100);
+      font-variation-settings: "wdth" 100;
+      margin-bottom: 0;
+    }
+
+    .identified-plant-sheet__name {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 24px;
+      line-height: 1.3;
+      color: var(--brand);
+      max-width: 294px;
+    }
+
+    .identified-plant-sheet__footer {
+      flex-shrink: 0;
+      width: 100%;
+      padding: 8px 0 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      box-sizing: border-box;
+    }
+
+    .identified-plant-sheet__primary {
+      width: 335px;
+      max-width: calc(100% - 40px);
+      height: 56px;
+      border: none;
+      border-radius: 28px;
+      background: var(--brand);
+      color: var(--wt100);
+      font-family: inherit;
+      font-weight: 590;
+      font-size: 18px;
+      line-height: 1.4;
+      font-variation-settings: "wdth" 100;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .identified-plant-sheet__secondary {
+      width: 335px;
+      max-width: calc(100% - 40px);
+      height: 56px;
+      margin: 0;
+      padding: 16px;
+      border: none;
+      background: transparent;
+      font-family: inherit;
+      font-weight: 590;
+      font-size: 18px;
+      line-height: 1.4;
+      font-variation-settings: "wdth" 100;
+      color: var(--text-bg100);
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: 8px;
+    }
+
+    .add-garden-tip--hide {
+      display: none !important;
+    }
+
+    /** Figma 8601:16872 — collapsing dismiss */
+    .add-garden-tip--closing {
+      pointer-events: none;
+    }
+
+    .identified-plant-sheet__home-indicator {
+      width: 100%;
+      min-height: 34px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 8px;
+      padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+      box-sizing: border-box;
+      background: #ffffff;
+    }
+
+    /* Override global `.home-indicator-img { width/height 100% }` — stretched SVG becomes a thick black band */
+    .identified-plant-sheet__home-indicator .home-indicator-img {
+      display: block;
+      width: 134px;
+      height: 5px;
+      max-width: min(134px, 100% - 32px);
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .screen.identified-sheet-open .page-dock {
+      pointer-events: none;
+    }
+
+    /* Full-screen Add stacks above identified sheet/backdrop · dock stays usable */
+    .screen[data-active-page="add-garden"] .page-dock {
+      z-index: 430;
+      pointer-events: auto;
+    }
+
+    /* —— Add to Garden · full screen (Figma 8601:16870) —— */
+    .add-garden {
+      position: absolute;
+      inset: 0;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      overflow: hidden;
+      border-radius: 40px;
+    }
+
+    .add-garden__status {
+      flex-shrink: 0;
+      background: #ffffff;
+    }
+
+    .add-garden__status img {
+      display: block;
+      width: 375px;
+      height: 44px;
+      object-fit: fill;
+    }
+
+    .add-garden__nav {
+      flex-shrink: 0;
+      min-height: 56px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      background: #ffffff;
+      box-sizing: border-box;
+    }
+
+    .add-garden__nav-back {
+      width: 40px;
+      height: 40px;
+      border-radius: 23px;
+      border: none;
+      background: #ffffff;
+      cursor: pointer;
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      color: var(--bk80);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .add-garden__nav-title {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.3;
+      color: var(--bk100);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    .add-garden__body {
+      flex: 1;
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 0 20px 148px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .add-garden__body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .add-garden__form-stack {
+      margin: 0 auto;
+      max-width: 295px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 30px;
+    }
+
+    /* Two inputs: gap-[20px] (8601:16885) */
+    .add-garden__fields-pair {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .add-garden__field {
+      display: block;
+      width: 100%;
+    }
+
+    /* Add profile tip banner — Figma 8601:16872 */
+    .add-garden-tip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      margin-bottom: 0;
+      max-width: 335px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 0;
+      border-radius: 16px;
+      border: 1px solid var(--wt20);
+      background: var(--func-brand5);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-sizing: border-box;
+      max-height: 120px;
+      overflow: hidden;
+      opacity: 1;
+      transform: translateY(0);
+      border-width: 1px;
+      transition:
+        opacity 0.26s ease,
+        transform 0.34s cubic-bezier(0.32, 0.72, 0, 1),
+        max-height 0.34s cubic-bezier(0.32, 0.72, 0, 1),
+        margin 0.24s ease,
+        padding-block 0.24s ease,
+        border-width 0.24s ease;
+    }
+
+    .add-garden-tip.add-garden-tip--closing {
+      opacity: 0;
+      transform: translateY(-10px);
+      max-height: 0;
+      margin-top: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+    }
+
+    .add-garden-tip__main {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .add-garden-tip__glyph {
+      flex-shrink: 0;
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      color: var(--brand);
+      line-height: 1;
+      letter-spacing: 0.48px;
+    }
+
+    .add-garden-tip__text {
+      flex: 1;
+      min-width: 0;
+      font-size: 14px;
+      line-height: 1.3;
+      font-variation-settings: "wdth" 100;
+      color: var(--bk80);
+    }
+
+    .add-garden-tip__close {
+      flex-shrink: 0;
+      align-self: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-family: "Rco", sans-serif;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--bk40);
+      letter-spacing: 0.36px;
+      padding: 4px;
+      margin: -4px -4px -4px 0;
+      -webkit-tap-highlight-color: transparent;
+      border-radius: 8px;
+    }
+
+    .add-garden__plant-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 40px;
+      transition: margin-top 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .add-garden__body:has(.add-garden-tip:not(.add-garden-tip--hide):not(.add-garden-tip--closing))
+      .add-garden__plant-block {
+      margin-top: 20px;
+    }
+
+    .add-garden__body:not(
+        :has(.add-garden-tip:not(.add-garden-tip--hide):not(.add-garden-tip--closing))
+      )
+      .add-garden__plant-block {
+      margin-top: 40px;
+    }
+
+    .add-garden__photo-slot {
+      position: relative;
+      width: 160px;
+      height: 160px;
+    }
+
+    /* Figma 8601:16512 — same asset as identified sheet */
+    .add-garden__plant-photo {
+      display: block;
+      width: 160px;
+      height: 160px;
+      object-fit: contain;
+    }
+
+    .add-garden__photo-edit {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 23px;
+      border: 1px solid var(--wt20);
+      background: var(--brand);
+      color: var(--wt100);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .add-garden__species-name {
+      font-family: var(--font-title);
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 1.3;
+      color: var(--brand);
+      text-align: center;
+      width: min(295px, 100%);
+    }
+
+    .add-garden__field-label {
+      display: block;
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 400;
+      font-variation-settings: "wdth" 100;
+      color: var(--bk60);
+      margin-bottom: 10px;
+      width: 100%;
+      text-align: left;
+    }
+
+    /* Plant name / adopted — text field chrome (Figma 8601:16889 · func brand 5) */
+    .add-garden__input {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      background: var(--func-brand5);
+      padding: 10px 44px 10px 20px;
+      min-height: 45px;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.4;
+      font-variation-settings: "wdth" 100;
+      color: var(--bk100);
+      caret-color: var(--success);
+      box-sizing: border-box;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .add-garden__input:focus {
+      outline: none;
+    }
+
+    .add-garden__input:focus-visible {
+      box-shadow: 0 0 0 2px rgba(31, 98, 70, 0.22);
+    }
+
+    .add-garden__input:read-only {
+      padding-right: 20px;
+      caret-color: transparent;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .add-garden__input:read-only:focus-visible {
+      box-shadow: none;
+    }
+
+    .add-garden__input-wrap {
+      position: relative;
+      width: 100%;
+      margin-bottom: 0;
+    }
+
+    /* Figma 8601:16896 — absolute right-[16px] top calc(50% - 8.5px) */
+    .add-garden__input-clear {
+      position: absolute;
+      right: 16px;
+      top: calc(50% - 8.5px);
+      transform: none;
+      border: none;
+      background: none;
+      font-family: "Rco", sans-serif;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--bk60);
+      letter-spacing: 0.36px;
+      cursor: pointer;
+      padding: 4px;
+      margin: -4px -4px -4px 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .add-garden__input-clear:focus-visible {
+      outline: 2px solid rgba(31, 98, 70, 0.35);
+      outline-offset: 2px;
+      border-radius: 8px;
+    }
+
+    .add-garden__reminder {
+      position: relative;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      width: 100%;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      margin-bottom: 0;
+    }
+
+    /* Reminder row — unchecked: Figma 8601:16076 (Rco · empty circle · bk40); checked: filled check */
+    .add-garden__indicator {
+      flex-shrink: 0;
+      font-family: "Rco", sans-serif;
+      font-size: 24px;
+      line-height: 1;
+      width: 1em;
+      height: 1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .add-garden__indicator-unchecked,
+    .add-garden__indicator-checked {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.18s ease;
+    }
+
+    .add-garden__indicator-unchecked {
+      color: var(--bk40);
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .add-garden__indicator-checked {
+      color: var(--success);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .add-garden__reminder:has(.add-garden__chk:checked) .add-garden__indicator-unchecked {
+      opacity: 0;
+    }
+
+    .add-garden__reminder:has(.add-garden__chk:checked) .add-garden__indicator-checked {
+      opacity: 1;
+    }
+
+    .add-garden__reminder-text {
+      flex: 1;
+      font-size: 16px;
+      line-height: 1.3;
+      font-variation-settings: "wdth" 100;
+      color: var(--bk80);
+    }
+
+    .add-garden__chk {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .add-garden__footer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 8px 20px calc(12px + env(safe-area-inset-bottom, 0));
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 4;
+      box-sizing: border-box;
+    }
+
+    /* Tab 用的 absolute bar 在白底上会撑满 footer + .home-indicator-img 100% → 整块黑条 */
+    .add-garden__footer .home-indicator-bar {
+      position: relative;
+      left: auto;
+      transform: none;
+      top: auto;
+      bottom: auto;
+      width: auto;
+      height: auto;
+      flex-shrink: 0;
+    }
+
+    .add-garden__footer .home-indicator-img {
+      width: 134px;
+      height: 5px;
+      max-width: min(134px, 100% - 32px);
+      object-fit: contain;
+      display: block;
+    }
+
+    .add-garden__submit {
+      width: 335px;
+      max-width: 100%;
+      height: 56px;
+      border: none;
+      border-radius: 28px;
+      background: var(--brand);
+      color: var(--wt100);
+      font-weight: 590;
+      font-size: 18px;
+      line-height: 1.4;
+      font-variation-settings: "wdth" 100;
+      cursor: pointer;
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .identified-sheet-backdrop,
+      .identified-plant-sheet,
+      .page--add-garden,
+      .add-garden-tip,
+      .add-garden__plant-block,
+      .add-garden__indicator-unchecked,
+      .add-garden__indicator-checked {
+        transition-duration: 0.01ms !important;
+      }
+    }
+
     /* —— Header / status —— */
     .header {
       position: absolute;
@@ -1629,7 +2545,30 @@
     /*
      * Bottom tab — nested under 8593:8223 · `btm_tab` 8617:3573 (Dev export).
      */
-    .tabbar {
+    /* 与 #page-garden / #page-add-garden 同级，始终在底部两页之上；quick sheet 时需高于抬升的 .page--garden(410)。 */
+    .screen[data-video-dock-active="true"] .tabbar.screen-tabbar {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .screen.action-sheet-open .tabbar.screen-tabbar {
+      z-index: 420;
+    }
+
+    .screen.identified-sheet-open .tabbar.screen-tabbar {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .screen[data-active-page="add-garden"] .tabbar.screen-tabbar {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .tabbar.screen-tabbar {
       position: absolute;
       left: 0;
       bottom: 0;
@@ -1637,9 +2576,9 @@
       height: 86px;
       background: var(--wt100);
       border-top: 1px solid var(--aid2);
-      padding: 0 10px;
+      padding: 0 6px;
       box-sizing: border-box;
-      z-index: 10;
+      z-index: 12;
       overflow: visible;
     }
 
@@ -1657,8 +2596,10 @@
 
     /* Side tabs — Dev: py-[8px] gap-[2px] items-center (8593:8223) */
     .tab {
-      flex: 0 0 60px;
-      width: 60px;
+      flex: 1 1 0;
+      min-width: 0;
+      width: auto;
+      max-width: 68px;
       height: 64px;
       display: flex;
       flex-direction: column;
@@ -1670,6 +2611,15 @@
       text-align: center;
       color: var(--bk40);
       box-sizing: border-box;
+    }
+
+    button.tab {
+      appearance: none;
+      border: none;
+      background: transparent;
+      font: inherit;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .tab--active {
@@ -1690,15 +2640,17 @@
 
     .tab__label {
       flex-shrink: 0;
-      height: 12px;
+      min-height: 12px;
       display: flex;
       align-items: flex-start;
       justify-content: center;
       font-weight: 590;
-      font-size: 10px;
-      line-height: normal;
+      font-size: 9px;
+      line-height: 1.05;
       width: 100%;
+      padding: 0 1px;
       font-variation-settings: "wdth" 100;
+      text-wrap: balance;
     }
 
     .tab-scan-slot {
@@ -1823,6 +2775,162 @@
       object-fit: fill;
     }
 
+    /*
+     * Mobile Safari / GitHub Pages：去掉「模拟手机框」留白，铺满可视区域；
+     * Garden 隐藏 Figma 状态栏条（系统已有状态栏）；Video 保留嵌入式 status PNG。
+     * 「添加到主屏幕」后可接近全屏（Safari 底栏仍会占用空间，属浏览器限制）。
+     */
+    @media screen and (max-width: 520px) {
+      html {
+        height: 100%;
+        height: -webkit-fill-available;
+      }
+
+      body {
+        align-items: stretch;
+        justify-content: stretch;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        min-height: 100dvh;
+        padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+          env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+        background: #0d0e12;
+      }
+
+      .screen {
+        width: 100%;
+        max-width: none;
+        height: auto;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        min-height: 100dvh;
+        border-radius: 0;
+      }
+
+      .page {
+        border-radius: 0;
+      }
+
+      .vc-phase {
+        border-radius: 0;
+      }
+
+      .page--garden .status-strip {
+        display: none;
+      }
+
+      .page--garden .header {
+        width: 100%;
+        height: 56px;
+      }
+
+      .page--garden .title-strip {
+        top: 0;
+      }
+
+      .page--garden .content {
+        top: 72px;
+        width: 100%;
+      }
+
+      .plant-card {
+        width: calc(100% - 40px);
+        max-width: 335px;
+      }
+
+      .header {
+        width: 100%;
+      }
+
+      .status-strip,
+      .status-strip img {
+        width: 100%;
+      }
+
+      .content {
+        width: 100%;
+      }
+
+      .tabbar.screen-tabbar {
+        width: 100%;
+      }
+
+      .home-indicator {
+        width: 100%;
+      }
+
+      .vc-status,
+      .vc-status-img {
+        width: 100%;
+      }
+
+      .vc-hang-wrap {
+        left: 0;
+        transform: none;
+        width: 100%;
+      }
+
+      .vc-home {
+        width: 100%;
+      }
+
+      .vc-active-grad-top,
+      .vc-active-grad-bottom {
+        width: 100%;
+      }
+
+      .vc-call-nav {
+        left: 0;
+        transform: none;
+        width: 100%;
+      }
+
+      .vc-call-hint {
+        width: 100%;
+      }
+
+      .vc-phase-connecting-controls,
+      .vc-active-controls {
+        left: 0;
+        transform: none;
+        width: 100%;
+      }
+
+      .action-sheet {
+        left: 50%;
+        width: min(295px, calc(100% - 32px));
+        transform: translateX(-50%) translateY(calc(100% + 120px));
+      }
+
+      .page--add-garden .add-garden__status {
+        display: none;
+      }
+
+      .identified-plant-sheet {
+        left: 0;
+        width: 100%;
+        max-width: none;
+        transform: translateY(110%);
+      }
+
+      .screen.identified-sheet-open .identified-plant-sheet {
+        transform: translateY(0);
+      }
+
+      .add-garden__status img {
+        width: 100%;
+        height: auto;
+      }
+
+      .add-garden {
+        border-radius: 0;
+      }
+
+      .screen.action-sheet-open .action-sheet {
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1908,49 +3016,9 @@
       </button>
     </aside>
 
-    <nav class="tabbar" aria-label="Primary">
-      <div class="tabbar-inner">
-        <div class="tab tab--active">
-          <span class="tab__icon" aria-hidden="true">&#xe97f;</span>
-          <span class="tab__label">Garden</span>
-        </div>
-        <div class="tab">
-          <span class="tab__icon" aria-hidden="true">&#xe99f;</span>
-          <span class="tab__label">Calendar</span>
-        </div>
-        <div class="tab-scan-slot">
-          <button
-            type="button"
-            class="tab-scan-btn"
-            id="tab-scan-toggle"
-            aria-expanded="false"
-            aria-controls="plantaid-action-sheet"
-            aria-label="Quick actions"
-          >
-            <span class="tab-scan-glyph-stack">
-              <span class="tab-scan-glyph tab-scan-glyph--scan" aria-hidden="true">&#xe9a2;</span>
-              <span class="tab-scan-glyph tab-scan-glyph--close" aria-hidden="true">&#xe92a;</span>
-            </span>
-          </button>
-        </div>
-        <div class="tab">
-          <span class="tab__icon" aria-hidden="true">&#xe98f;</span>
-          <span class="tab__label">For You</span>
-        </div>
-        <div class="tab">
-          <span class="tab__icon" aria-hidden="true">&#xe98b;</span>
-          <span class="tab__label">Settings</span>
-        </div>
-      </div>
-      <div class="home-indicator" aria-hidden="true">
-        <div class="home-indicator-bar">
-          <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
-        </div>
-      </div>
-    </nav>
     </div>
 
-    <div class="page page--video-call" id="page-video-call" aria-hidden="true" data-video-phase="connecting" data-vc-screen="dialing" data-vc-camera="front" data-vc-call-ui="listening" data-vc-speaker="doctor" data-vc-subtitles="expanded" data-vc-torch="off">
+    <div class="page page--video-call" id="page-video-call" aria-hidden="true" data-video-phase="connecting" data-vc-screen="dialing" data-vc-camera="front" data-vc-call-ui="listening" data-vc-speaker="doctor" data-vc-voice-hint="hidden" data-vc-subtitles="expanded" data-vc-torch="off">
       <audio id="vc-ring-audio" data-vc-bgm-id="1" data-vc-bgm-role="dialing" loop preload="auto" playsinline>
         <source src="assets/ring-marimba-universfield-487903.mp3" type="audio/mpeg" />
       </audio>
@@ -2048,7 +3116,7 @@
             <div class="vc-processing-text-wrap vc-joining-card-text-spacer" aria-hidden="true"></div>
           </div>
         </div>
-        <p class="vc-joining-caption">Connecting...</p>
+        <p class="vc-call-hint vc-joining-caption" id="vc-joining-caption">Connecting...</p>
         <div class="vc-active-controls vc-phase-joining-controls">
           <button type="button" class="vc-active-round-btn vc-active-round-btn--danger" id="vc-join-hangup" aria-label="End call">
             &#xe92a;
@@ -2123,7 +3191,7 @@
             </div>
           </div>
         </div>
-        <p class="vc-voice-hint" id="vc-voice-hint" aria-hidden="true">Please start speaking.</p>
+        <p class="vc-call-hint vc-voice-hint" id="vc-voice-hint" aria-hidden="true">Please start speaking.</p>
         <div class="vc-active-controls">
           <button type="button" class="vc-active-round-btn vc-active-round-btn--danger" id="vc-active-hangup" aria-label="End call">
             &#xe92a;
@@ -2150,9 +3218,181 @@
       </div>
     </div>
 
-    <nav class="page-dock" id="page-dock" aria-label="Screen navigation">
+    <div class="page page--add-garden" id="page-add-garden" aria-hidden="true">
+      <div class="add-garden">
+        <div class="add-garden__status">
+          <img src="assets/status-bar-wt.png" alt="" width="375" height="44" decoding="async" />
+        </div>
+        <header class="add-garden__nav">
+          <button type="button" class="add-garden__nav-back" id="add-garden-back" aria-label="Back">
+            &#xe900;
+          </button>
+          <span class="add-garden__nav-title">Add To Garden</span>
+        </header>
+        <div class="add-garden__body" id="add-garden-scroll">
+          <aside class="add-garden-tip" id="add-garden-tip-banner" role="status">
+            <div class="add-garden-tip__main">
+              <span class="add-garden-tip__glyph" aria-hidden="true">&#xe915;</span>
+              <p class="add-garden-tip__text">Now you can edit your plant profile picture</p>
+            </div>
+            <button type="button" class="add-garden-tip__close" id="add-garden-tip-dismiss" aria-label="Dismiss tip">
+              &#xe92a;
+            </button>
+          </aside>
+          <div class="add-garden__plant-block">
+            <div class="add-garden__photo-slot">
+              <img
+                class="add-garden__plant-photo"
+                src="assets/figma/add-garden-photo-8601-16512.png"
+                alt="Peace lily"
+                width="160"
+                height="160"
+                decoding="async"
+              />
+              <button type="button" class="add-garden__photo-edit" aria-label="Edit photo">&#xe907;</button>
+            </div>
+            <span class="add-garden__species-name">Peace Lily</span>
+          </div>
+          <div class="add-garden__form-stack">
+            <div class="add-garden__fields-pair">
+              <label class="add-garden__field">
+                <span class="add-garden__field-label">Plant Name</span>
+                <span class="add-garden__input-wrap">
+                  <input
+                    class="add-garden__input"
+                    id="add-garden-name-input"
+                    type="text"
+                    value="Baby Plant"
+                    autocomplete="off"
+                    spellcheck="false"
+                  />
+                  <button type="button" class="add-garden__input-clear" id="add-garden-name-clear" aria-label="Clear name">
+                    &#xe92a;
+                  </button>
+                </span>
+              </label>
+              <label class="add-garden__field">
+                <span class="add-garden__field-label">Adopted on</span>
+                <input
+                  class="add-garden__input"
+                  id="add-garden-adopted-input"
+                  type="text"
+                  readonly
+                  tabindex="-1"
+                  aria-readonly="true"
+                />
+              </label>
+            </div>
+            <label class="add-garden__reminder">
+              <input class="add-garden__chk" id="add-garden-reminder" type="checkbox" aria-describedby="add-garden-reminder-text" />
+              <span class="add-garden__indicator" aria-hidden="true">
+                <span class="add-garden__indicator-unchecked">&#xe94a;</span>
+                <span class="add-garden__indicator-checked">&#xe92b;</span>
+              </span>
+              <span id="add-garden-reminder-text" class="add-garden__reminder-text">
+                Set a reminder to get another diagnosis in 3 days?
+              </span>
+            </label>
+          </div>
+        </div>
+        <footer class="add-garden__footer">
+          <button type="button" class="add-garden__submit" id="add-garden-submit">Add to Garden</button>
+          <div class="home-indicator-bar">
+            <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <nav class="tabbar screen-tabbar" id="screen-tabbar" aria-label="Primary">
+      <div class="tabbar-inner">
+        <button type="button" class="tab tab--active" data-root-tab="garden" aria-current="page" aria-label="Garden">
+          <span class="tab__icon" aria-hidden="true">&#xe97f;</span>
+          <span class="tab__label">Garden</span>
+        </button>
+        <div class="tab">
+          <span class="tab__icon" aria-hidden="true">&#xe99f;</span>
+          <span class="tab__label">Calendar</span>
+        </div>
+        <div class="tab-scan-slot">
+          <button
+            type="button"
+            class="tab-scan-btn"
+            id="tab-scan-toggle"
+            aria-expanded="false"
+            aria-controls="plantaid-action-sheet"
+            aria-label="Quick actions"
+          >
+            <span class="tab-scan-glyph-stack">
+              <span class="tab-scan-glyph tab-scan-glyph--scan" aria-hidden="true">&#xe9a2;</span>
+              <span class="tab-scan-glyph tab-scan-glyph--close" aria-hidden="true">&#xe92a;</span>
+            </span>
+          </button>
+        </div>
+        <div class="tab">
+          <span class="tab__icon" aria-hidden="true">&#xe98f;</span>
+          <span class="tab__label">For You</span>
+        </div>
+        <div class="tab">
+          <span class="tab__icon" aria-hidden="true">&#xe98b;</span>
+          <span class="tab__label">Settings</span>
+        </div>
+      </div>
+      <div class="home-indicator" aria-hidden="true">
+        <div class="home-indicator-bar">
+          <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+        </div>
+      </div>
+    </nav>
+
+    <div id="identified-sheet-backdrop" class="identified-sheet-backdrop" aria-hidden="true"></div>
+    <aside
+      id="identified-plant-sheet"
+      class="identified-plant-sheet"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="identified-plant-sheet-heading"
+      aria-hidden="true"
+    >
+      <div class="identified-plant-sheet__dismiss-row">
+        <button type="button" class="identified-plant-sheet__close" id="identified-sheet-close" aria-label="Dismiss">
+          &#xe92a;
+        </button>
+      </div>
+      <div class="identified-plant-sheet__scroll">
+        <div class="identified-plant-sheet__main">
+          <img
+            class="identified-plant-sheet__plant-photo"
+            src="assets/figma/add-garden-photo-8601-16512.png"
+            alt="Peace lily"
+            width="160"
+            height="160"
+            decoding="async"
+          />
+          <div class="identified-plant-sheet__copy">
+            <p id="identified-plant-sheet-heading" class="identified-plant-sheet__lead">
+              The plant that Plant Doctor just identified is:
+            </p>
+            <p class="identified-plant-sheet__name">Peace Lily</p>
+          </div>
+        </div>
+      </div>
+      <div class="identified-plant-sheet__footer">
+        <button type="button" class="identified-plant-sheet__primary" id="identified-sheet-edit-add">
+          Edit and Add to Garden
+        </button>
+        <button type="button" class="identified-plant-sheet__secondary" id="identified-sheet-diagnose-again">
+          Diagnose Again
+        </button>
+        <div class="identified-plant-sheet__home-indicator">
+          <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
+        </div>
+      </div>
+    </aside>
+
+    <nav class="page-dock page-dock--collapsed" id="page-dock" aria-label="Screen navigation">
       <div class="page-dock__fabs" id="page-dock-fabs">
-        <button type="button" class="page-dock__fab is-active" data-page="garden" aria-label="主页" aria-current="page">
+        <button type="button" class="page-dock__fab is-active" data-page="garden" aria-label="My Garden" aria-current="page">
           &#xe97f;
         </button>
         <button type="button" class="page-dock__fab" data-page="video-dialing" aria-label="拨打中">
@@ -2161,11 +3401,16 @@
         <button type="button" class="page-dock__fab" data-page="video-in-call" aria-label="通话中">
           &#xe93b;
         </button>
+        <button type="button" class="page-dock__fab page-dock__fab--add-entry" data-page="add-garden" aria-label="Add to Garden">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+            <path d="M8 3.5v9M3.5 8h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+        </button>
       </div>
-      <button type="button" class="page-dock__toggle" id="page-dock-toggle" aria-expanded="true" aria-controls="page-dock-fabs" aria-label="Collapse screen navigation">
+      <button type="button" class="page-dock__toggle" id="page-dock-toggle" aria-expanded="false" aria-controls="page-dock-fabs" aria-label="Expand screen navigation">
         <span class="page-dock__toggle-icon" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" focusable="false">
-            <path d="M3.25 5.25 L7 8.75 L10.75 5.25" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M3.25 8.75 L7 5.25 L10.75 8.75" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </span>
       </button>
@@ -2205,6 +3450,9 @@
       var vcTimerInterval = null;
       var vcTypewriterTimer = null;
       var vcSpeechChainTimer = null;
+      var vcFocusHideTimer = null;
+      var vcCameraFlipTimerA = null;
+      var vcCameraFlipTimerB = null;
       var VC_DOCTOR_PART1 = "Hi! I'm your plant doctor.";
       var VC_DOCTOR_PART2 = " Let's take a look at your plant and see how it's doing!";
       var VC_PROCESSING_MESSAGE = VC_DOCTOR_PART1 + VC_DOCTOR_PART2;
@@ -2215,7 +3463,9 @@
       var VC_USER_ROUND2 =
         "Great. Could we start with how often I should water a peace lily indoors?";
       var VC_CAMERA_BG_FRONT = "assets/video-call-active-bg.jpg";
-      var VC_CAMERA_BG_BACK = "assets/vc-camera-flipped-bg.png";
+      var VC_CAMERA_BG_BACK = "assets/vc-camera-selfie-bg.jpg";
+      /** Half of flip animation; keep in sync with CSS keyframes duration (420ms). */
+      var VC_CAMERA_FLIP_HALF_MS = 420;
 
       /**
        * 视频通话 · 事件 ↔ 资源（规格表）
@@ -2240,14 +3490,55 @@
           });
       }
 
+      function resetVcCameraFlipVisual() {
+        if (!pageVideo) return;
+        if (vcCameraFlipTimerA) clearTimeout(vcCameraFlipTimerA);
+        if (vcCameraFlipTimerB) clearTimeout(vcCameraFlipTimerB);
+        vcCameraFlipTimerA = null;
+        vcCameraFlipTimerB = null;
+        pageVideo.dataset.vcCameraFlipLock = "0";
+        pageVideo.classList.remove("vc-camera-flip-out", "vc-camera-flip-in");
+      }
+
       function toggleVcCameraFacing() {
         if (!pageVideo) return;
-        pageVideo.dataset.vcCamera = pageVideo.dataset.vcCamera === "back" ? "front" : "back";
-        syncVcCameraBg();
+        if (pageVideo.dataset.vcCameraFlipLock === "1") return;
+
+        function applyFacingSwap() {
+          pageVideo.dataset.vcCamera = pageVideo.dataset.vcCamera === "back" ? "front" : "back";
+          syncVcCameraBg();
+        }
+
+        if (prefersReducedMotion()) {
+          applyFacingSwap();
+          return;
+        }
+
+        resetVcCameraFlipVisual();
+        pageVideo.dataset.vcCameraFlipLock = "1";
+        pageVideo.classList.remove("vc-camera-flip-in");
+        pageVideo.classList.add("vc-camera-flip-out");
+
+        vcCameraFlipTimerA = setTimeout(function () {
+          vcCameraFlipTimerA = null;
+          applyFacingSwap();
+          pageVideo.classList.remove("vc-camera-flip-out");
+          pageVideo.classList.add("vc-camera-flip-in");
+          void pageVideo.offsetWidth;
+          vcCameraFlipTimerB = setTimeout(function () {
+            vcCameraFlipTimerB = null;
+            pageVideo.classList.remove("vc-camera-flip-in");
+            pageVideo.dataset.vcCameraFlipLock = "0";
+          }, VC_CAMERA_FLIP_HALF_MS);
+        }, VC_CAMERA_FLIP_HALF_MS);
       }
 
       function hideVcFocusFrames() {
         if (!pageVideo) return;
+        if (vcFocusHideTimer) {
+          clearTimeout(vcFocusHideTimer);
+          vcFocusHideTimer = null;
+        }
         pageVideo.querySelectorAll(".vc-focus-frame").forEach(function (el) {
           el.classList.remove("vc-focus-frame--visible");
         });
@@ -2257,6 +3548,10 @@
         var phase = hitLayer.closest(".vc-phase");
         var frame = hitLayer.querySelector(".vc-focus-frame");
         if (!phase || !frame) return;
+        if (vcFocusHideTimer) {
+          clearTimeout(vcFocusHideTimer);
+          vcFocusHideTimer = null;
+        }
         var rect = phase.getBoundingClientRect();
         var x = clientX - rect.left;
         var y = clientY - rect.top;
@@ -2270,6 +3565,10 @@
         frame.style.top = y - half + "px";
         requestAnimationFrame(function () {
           frame.classList.add("vc-focus-frame--visible");
+          vcFocusHideTimer = setTimeout(function () {
+            vcFocusHideTimer = null;
+            frame.classList.remove("vc-focus-frame--visible");
+          }, 1000);
         });
       }
 
@@ -2289,16 +3588,26 @@
 
       function setVcVoiceHintVisible(on) {
         var el = document.getElementById("vc-voice-hint");
-        if (!el) return;
+        if (!el || !pageVideo) return;
         el.classList.toggle("vc-voice-hint--visible", !!on);
         el.setAttribute("aria-hidden", on ? "false" : "true");
-        if (on) setVcCallUi("listening");
+        pageVideo.dataset.vcVoiceHint = on ? "visible" : "hidden";
+        if (on) {
+          setVcCallUi("listening");
+          setVcSpeechSpeaker("doctor");
+        }
       }
       var pageDock = document.getElementById("page-dock");
       var dockToggle = document.getElementById("page-dock-toggle");
       if (!root || !toggle || !sheet || !backdrop || !pageGarden || !pageVideo) return;
 
       var dockBtns = root.querySelectorAll(".page-dock__fab");
+      var pageAddGarden = document.getElementById("page-add-garden");
+      var addGardenTipBanner = document.getElementById("add-garden-tip-banner");
+      var addGardenTipCloseTimer = null;
+      var ADD_GARDEN_TIP_CLOSE_MS = 340;
+      var identifiedBackdropEl = document.getElementById("identified-sheet-backdrop");
+      var identifiedSheetEl = document.getElementById("identified-plant-sheet");
 
       function syncDockCollapsedAria() {
         if (!pageDock || !dockToggle) return;
@@ -2309,6 +3618,149 @@
           collapsed ? "Expand screen navigation" : "Collapse screen navigation",
         );
       }
+
+      var DOCK_EDGE = 12;
+      var DOCK_DRAG_SENS = 5;
+      var dockGest = null;
+      var dockClickBlockUntil = 0;
+
+      function clampDockInsideScreenOnly() {
+        if (!pageDock || !root || !pageDock.classList.contains("page-dock--pos-js")) return;
+        var pw = pageDock.offsetWidth;
+        var ph = pageDock.offsetHeight;
+        if (!pw || !ph) return;
+        var l = parseFloat(pageDock.style.left);
+        var t = parseFloat(pageDock.style.top);
+        if (isNaN(l) || isNaN(t)) return;
+        var sw = root.clientWidth;
+        var sh = root.clientHeight;
+        l = Math.max(DOCK_EDGE, Math.min(sw - pw - DOCK_EDGE, l));
+        t = Math.max(DOCK_EDGE, Math.min(sh - ph - DOCK_EDGE, t));
+        pageDock.style.left = l + "px";
+        pageDock.style.top = t + "px";
+      }
+
+      function scheduleDockClamp() {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(clampDockInsideScreenOnly);
+        });
+      }
+
+      /** Converts initial CSS anchoring (left + 50% + translateY) into px inside #app-screen. */
+      function snapshotDockCssToPixelsOnce() {
+        if (!pageDock || !root) return;
+        if (pageDock.classList.contains("page-dock--pos-js")) return;
+        var dh = pageDock.offsetHeight;
+        var dw = pageDock.offsetWidth;
+        if (!dh || !dw) return;
+        var sh = root.clientHeight;
+        var sw = root.clientWidth;
+        var left = Math.max(DOCK_EDGE, Math.min(sw - dw - DOCK_EDGE, DOCK_EDGE));
+        var top = Math.round((sh - dh) / 2);
+        top = Math.max(DOCK_EDGE, Math.min(sh - dh - DOCK_EDGE, top));
+        pageDock.style.left = left + "px";
+        pageDock.style.top = top + "px";
+        pageDock.style.transform = "none";
+        pageDock.classList.add("page-dock--pos-js");
+      }
+
+      if (pageDock) {
+        pageDock.addEventListener("pointerdown", function (ev) {
+          if (root.classList.contains("identified-sheet-open")) return;
+          if (ev.pointerType === "mouse" && ev.button !== 0) return;
+          /* FAB / chevron carry their own click; capturing on the nav steals pointerup → breaks toggle expand & nav */
+          var hitInteractive = ev.target.closest(".page-dock__fab, .page-dock__toggle");
+          if (hitInteractive && pageDock.contains(hitInteractive)) return;
+
+          snapshotDockCssToPixelsOnce();
+
+          var r = pageDock.getBoundingClientRect();
+          dockGest = {
+            id: ev.pointerId,
+            startX: ev.clientX,
+            startY: ev.clientY,
+            dragging: false,
+            ox: ev.clientX - r.left,
+            oy: ev.clientY - r.top,
+          };
+          try {
+            pageDock.setPointerCapture(ev.pointerId);
+          } catch (ignore) {}
+
+          function move(ev2) {
+            if (!dockGest || ev2.pointerId !== dockGest.id) return;
+            var edx = ev2.clientX - dockGest.startX;
+            var edy = ev2.clientY - dockGest.startY;
+            if (
+              !dockGest.dragging &&
+              (Math.abs(edx) > DOCK_DRAG_SENS || Math.abs(edy) > DOCK_DRAG_SENS)
+            ) {
+              dockGest.dragging = true;
+            }
+            if (!dockGest.dragging) return;
+
+            pageDock.style.touchAction = "none";
+            if (ev2.cancelable) ev2.preventDefault();
+
+            pageDock.classList.add("page-dock--dragging");
+
+            var rootR = root.getBoundingClientRect();
+            var nl = ev2.clientX - dockGest.ox - rootR.left;
+            var nt = ev2.clientY - dockGest.oy - rootR.top;
+            var pw = pageDock.offsetWidth;
+            var ph = pageDock.offsetHeight;
+            nl = Math.max(DOCK_EDGE, Math.min(root.clientWidth - pw - DOCK_EDGE, nl));
+            nt = Math.max(DOCK_EDGE, Math.min(root.clientHeight - ph - DOCK_EDGE, nt));
+            pageDock.style.left = nl + "px";
+            pageDock.style.top = nt + "px";
+            pageDock.classList.add("page-dock--pos-js");
+            pageDock.style.transform = "none";
+          }
+
+          function end(ev2) {
+            if (!dockGest || ev2.pointerId !== dockGest.id) return;
+            try {
+              pageDock.releasePointerCapture(ev2.pointerId);
+            } catch (ignore3) {}
+
+            var dragged = dockGest.dragging;
+            dockGest = null;
+            pageDock.classList.remove("page-dock--dragging");
+            pageDock.style.touchAction = "";
+
+            pageDock.removeEventListener("pointermove", move);
+            pageDock.removeEventListener("pointerup", end);
+            pageDock.removeEventListener("pointercancel", end);
+
+            if (dragged) dockClickBlockUntil = Date.now() + 400;
+          }
+
+          pageDock.addEventListener("pointermove", move, { passive: false });
+          pageDock.addEventListener("pointerup", end);
+          pageDock.addEventListener("pointercancel", end);
+        });
+
+        pageDock.addEventListener(
+          "click",
+          function (ev) {
+            if (Date.now() < dockClickBlockUntil) {
+              ev.preventDefault();
+              ev.stopPropagation();
+            }
+          },
+          true,
+        );
+
+        window.addEventListener("resize", clampDockInsideScreenOnly);
+      }
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          if (!pageDock) return;
+          snapshotDockCssToPixelsOnce();
+          clampDockInsideScreenOnly();
+        });
+      });
 
       function parseVcConnectingLottieData() {
         var tag = document.getElementById("vc-connecting-lottie-data");
@@ -2387,6 +3839,31 @@
           });
         } catch (ignore) {
           vcConnectingLottieAnim = null;
+        }
+      }
+
+      /**
+       * 拨打中 Lottie + 铃声：仅在通话页对用户可见且在视频 Dock 中时启动，
+       * 避免 vcMediaLeave 已隐藏页面却仍 play、或别处只 setPhase 而未带起媒体。
+       */
+      function kickVcConnectingMediaIfEligible() {
+        if (!pageVideo || !root) return;
+        if (!pageVideo.classList.contains("is-active")) return;
+        if (!isDockVideoPage(root.dataset.activePage)) return;
+        if (pageVideo.dataset.videoPhase !== "connecting") return;
+        ensureVcConnectingLottie(function (anim) {
+          if (
+            anim &&
+            pageVideo.classList.contains("is-active") &&
+            isDockVideoPage(root.dataset.activePage) &&
+            pageVideo.dataset.videoPhase === "connecting"
+          )
+            anim.play();
+        });
+        if (vcRing) {
+          vcRing.currentTime = 0;
+          var p = vcRing.play();
+          if (p && typeof p.catch === "function") p.catch(function () {});
         }
       }
 
@@ -2553,6 +4030,9 @@
 
         var pauseAfterDoctor = 520;
         var pauseAfterUser = 640;
+        /** 首轮：模拟未及时开口 — 2s 淡入（.vc-voice-hint）后再全亮停留 3s，再打字；第二轮不再提示 */
+        var vcVoiceHintFadeInMs = 2000;
+        var pauseSpeakHintFirstHoldMs = 3000;
 
         runVcBubbleTypewriter({
           speaker: "doctor",
@@ -2567,7 +4047,7 @@
                 onDone: function () {
                   delayVcSpeech(pauseAfterDoctor, function () {
                     setVcVoiceHintVisible(true);
-                    delayVcSpeech(pauseAfterUser, function () {
+                    delayVcSpeech(vcVoiceHintFadeInMs + pauseSpeakHintFirstHoldMs, function () {
                       runVcBubbleTypewriter({
                         speaker: "user",
                         message: VC_USER_MESSAGE,
@@ -2577,13 +4057,10 @@
                               speaker: "doctor",
                               message: VC_DOCTOR_ROUND2,
                               onDone: function () {
-                                delayVcSpeech(pauseAfterDoctor, function () {
-                                  setVcVoiceHintVisible(true);
-                                  delayVcSpeech(pauseAfterUser, function () {
-                                    runVcBubbleTypewriter({
-                                      speaker: "user",
-                                      message: VC_USER_ROUND2,
-                                    });
+                                delayVcSpeech(pauseAfterUser, function () {
+                                  runVcBubbleTypewriter({
+                                    speaker: "user",
+                                    message: VC_USER_ROUND2,
                                   });
                                 });
                               },
@@ -2621,6 +4098,7 @@
 
       function updateDockPageTitle(page) {
         if (page === "garden") document.title = "PlantAID — My Garden";
+        else if (page === "add-garden") document.title = "PlantAID — Add To Garden";
         else if (page === "video-dialing") document.title = "PlantAID — 拨打中";
         else if (page === "video-in-call") document.title = "PlantAID — 通话中";
       }
@@ -2691,6 +4169,7 @@
           if (vcActiveLottieAnim) vcActiveLottieAnim.pause();
           if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
           if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
+          kickVcConnectingMediaIfEligible();
         }
         syncVcCallScreenContext();
       }
@@ -2732,21 +4211,9 @@
         syncVcTorchButtons();
         pageVideo.dataset.vcCamera = "front";
         syncVcCameraBg();
+        resetVcCameraFlipVisual();
         hideVcFocusFrames();
         setVideoPhase("connecting");
-        ensureVcConnectingLottie(function (anim) {
-          if (
-            anim &&
-            isDockVideoPage(root.dataset.activePage) &&
-            pageVideo.dataset.videoPhase === "connecting"
-          )
-            anim.play();
-        });
-        if (vcRing) {
-          vcRing.currentTime = 0;
-          var p = vcRing.play();
-          if (p && typeof p.catch === "function") p.catch(function () {});
-        }
         vcConnectTimer = setTimeout(advanceVcToJoining, 5000);
       }
 
@@ -2763,6 +4230,7 @@
         syncVcTorchButtons();
         pageVideo.dataset.vcCamera = "front";
         syncVcCameraBg();
+        resetVcCameraFlipVisual();
         hideVcFocusFrames();
         if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
         if (vcJoiningLottieAnim) vcJoiningLottieAnim.pause();
@@ -2791,6 +4259,7 @@
         syncVcTorchButtons();
         pageVideo.dataset.vcCamera = "front";
         syncVcCameraBg();
+        resetVcCameraFlipVisual();
         hideVcFocusFrames();
         setVideoPhase("connecting");
         if (vcConnectingLottieAnim) vcConnectingLottieAnim.pause();
@@ -2828,24 +4297,100 @@
         backdrop.setAttribute("aria-hidden", open ? "false" : "true");
       }
 
+      function setIdentifiedPlantSheetOpen(open) {
+        if (!root) return;
+        var on = !!open;
+        root.classList.toggle("identified-sheet-open", on);
+        if (identifiedBackdropEl)
+          identifiedBackdropEl.setAttribute("aria-hidden", on ? "false" : "true");
+        if (identifiedSheetEl)
+          identifiedSheetEl.setAttribute("aria-hidden", on ? "false" : "true");
+        if (on) setOpen(false);
+      }
+
+      function formatAdoptedDate(d) {
+        d = d || new Date();
+        return new Intl.DateTimeFormat("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        }).format(d);
+      }
+
+      function syncAddGardenAdoptedField() {
+        var ag = document.getElementById("add-garden-adopted-input");
+        if (ag) ag.value = formatAdoptedDate(new Date());
+      }
+
+      function syncPrimaryTabRail() {
+        var rail = document.getElementById("screen-tabbar");
+        if (!rail || !root) return;
+        var page = root.dataset.activePage;
+        rail.querySelectorAll("[data-root-tab]").forEach(function (btn) {
+          var id = btn.getAttribute("data-root-tab");
+          var on =
+            id === page ||
+            (id === "garden" && page === "add-garden");
+          btn.classList.toggle("tab--active", on);
+          if (on) btn.setAttribute("aria-current", "page");
+          else btn.removeAttribute("aria-current");
+        });
+      }
+
       function setActivePage(page, opts) {
         opts = opts || {};
-        if (page !== "garden" && !isDockVideoPage(page)) return;
+        if (page !== "garden" && !isDockVideoPage(page) && page !== "add-garden") return;
         var prevPage = root.dataset.activePage;
+        var prevWasVideo = isDockVideoPage(prevPage);
         var videoOn = isDockVideoPage(page);
+        var addGardenActive = page === "add-garden";
+        var openIdentifiedSheet =
+          page === "garden" && prevWasVideo && !opts.skipPostCallSheet;
+
         root.dataset.activePage = page;
         root.dataset.videoDockActive = videoOn ? "true" : "false";
+
         pageGarden.classList.toggle("is-active", page === "garden");
-        pageVideo.classList.toggle("is-active", videoOn);
         pageGarden.setAttribute("aria-hidden", page === "garden" ? "false" : "true");
+
+        pageVideo.classList.toggle("is-active", videoOn);
         pageVideo.setAttribute("aria-hidden", videoOn ? "false" : "true");
+
+        if (pageAddGarden) {
+          pageAddGarden.classList.toggle("is-active", addGardenActive);
+          pageAddGarden.setAttribute("aria-hidden", addGardenActive ? "false" : "true");
+          if (addGardenActive) {
+            syncAddGardenAdoptedField();
+            if (addGardenTipBanner) {
+              if (addGardenTipCloseTimer) {
+                window.clearTimeout(addGardenTipCloseTimer);
+                addGardenTipCloseTimer = null;
+              }
+              addGardenTipBanner.classList.remove("add-garden-tip--hide", "add-garden-tip--closing");
+              addGardenTipBanner.removeAttribute("aria-hidden");
+            }
+          }
+        }
+
         dockBtns.forEach(function (btn) {
-          var sel = btn.getAttribute("data-page") === page;
+          var bp = btn.getAttribute("data-page");
+          var sel =
+            bp === page ||
+            (videoOn && bp === page);
           btn.classList.toggle("is-active", sel);
           if (sel) btn.setAttribute("aria-current", "page");
           else btn.removeAttribute("aria-current");
         });
+
         setOpen(false);
+        var preserveIdentifiedUnderAdd =
+          page === "add-garden" ||
+          (page === "garden" &&
+            prevPage === "add-garden" &&
+            root.classList.contains("identified-sheet-open"));
+        if (!openIdentifiedSheet && !preserveIdentifiedUnderAdd) {
+          setIdentifiedPlantSheetOpen(false);
+        }
         updateDockPageTitle(page);
         if (videoOn) {
           if (vcInfo) vcInfo.classList.remove("vc-info--hidden");
@@ -2856,10 +4401,18 @@
           }
         } else {
           vcMediaLeave();
-          if (isDockVideoPage(prevPage) && !opts.skipHangSound) playVcEndCall();
+          if (prevWasVideo && !opts.skipHangSound) playVcEndCall();
         }
         syncVcCallScreenContext();
         syncDockCollapsedAria();
+        syncPrimaryTabRail();
+
+        if (openIdentifiedSheet) {
+          window.setTimeout(function () {
+            if (root.dataset.activePage !== "garden") return;
+            setIdentifiedPlantSheetOpen(true);
+          }, 360);
+        }
       }
 
       if (dockToggle && pageDock) {
@@ -2867,6 +4420,7 @@
           e.stopPropagation();
           pageDock.classList.toggle("page-dock--collapsed");
           syncDockCollapsedAria();
+          scheduleDockClamp();
         });
       }
       syncDockCollapsedAria();
@@ -2878,6 +4432,17 @@
       backdrop.addEventListener("click", function () {
         setOpen(false);
       });
+
+      var screenTabbar = document.getElementById("screen-tabbar");
+      if (screenTabbar) {
+        screenTabbar.addEventListener("click", function (ev) {
+          var hit = ev.target.closest("[data-root-tab]");
+          if (!hit || !screenTabbar.contains(hit)) return;
+          var pg = hit.getAttribute("data-root-tab");
+          if (!pg || pg !== "garden") return;
+          setActivePage("garden");
+        });
+      }
 
       sheet.querySelectorAll(".action-sheet-row").forEach(function (row) {
         row.addEventListener("click", function () {
@@ -2902,7 +4467,7 @@
       function bindVcMinimize(btn) {
         if (!btn) return;
         btn.addEventListener("click", function () {
-          setActivePage("garden", { skipHangSound: true });
+          setActivePage("garden", { skipHangSound: true, skipPostCallSheet: true });
         });
       }
       bindVcMinimize(document.getElementById("vc-join-minimize-leading"));
@@ -2979,9 +4544,102 @@
 
       document.addEventListener("keydown", function (e) {
         if (e.key !== "Escape") return;
+        if (root.classList.contains("identified-sheet-open")) {
+          setIdentifiedPlantSheetOpen(false);
+          return;
+        }
+        if (root.dataset.activePage === "add-garden") {
+          setActivePage("garden");
+          return;
+        }
         if (isDockVideoPage(root.dataset.activePage)) setActivePage("garden");
         else setOpen(false);
       });
+
+      var identifiedSheetCloseBtn = document.getElementById("identified-sheet-close");
+      if (identifiedSheetCloseBtn) {
+        identifiedSheetCloseBtn.addEventListener("click", function () {
+          setIdentifiedPlantSheetOpen(false);
+        });
+      }
+      var identifiedBackdropClick = identifiedBackdropEl;
+      if (identifiedBackdropClick) {
+        identifiedBackdropClick.addEventListener("click", function () {
+          setIdentifiedPlantSheetOpen(false);
+        });
+      }
+      var identifiedEditAddBtn = document.getElementById("identified-sheet-edit-add");
+      if (identifiedEditAddBtn) {
+        identifiedEditAddBtn.addEventListener("click", function () {
+          setIdentifiedPlantSheetOpen(false);
+          setActivePage("add-garden");
+        });
+      }
+      var identifiedDiagBtn = document.getElementById("identified-sheet-diagnose-again");
+      if (identifiedDiagBtn) {
+        identifiedDiagBtn.addEventListener("click", function () {
+          setIdentifiedPlantSheetOpen(false);
+          setActivePage("video-dialing");
+        });
+      }
+
+      var agBackBtn = document.getElementById("add-garden-back");
+      if (agBackBtn) {
+        agBackBtn.addEventListener("click", function () {
+          setActivePage("garden");
+        });
+      }
+      var agSubmitBtn = document.getElementById("add-garden-submit");
+      if (agSubmitBtn) {
+        agSubmitBtn.addEventListener("click", function () {
+          setIdentifiedPlantSheetOpen(false);
+          setActivePage("garden");
+        });
+      }
+
+      var addGardenTipDismiss = document.getElementById("add-garden-tip-dismiss");
+      if (addGardenTipDismiss && addGardenTipBanner) {
+        addGardenTipDismiss.addEventListener("click", function () {
+          function finishHide() {
+            addGardenTipCloseTimer = null;
+            addGardenTipBanner.classList.remove("add-garden-tip--closing");
+            addGardenTipBanner.classList.add("add-garden-tip--hide");
+            addGardenTipBanner.setAttribute("aria-hidden", "true");
+          }
+          if (addGardenTipBanner.classList.contains("add-garden-tip--hide")) return;
+          if (addGardenTipBanner.classList.contains("add-garden-tip--closing")) return;
+          if (addGardenTipCloseTimer) {
+            window.clearTimeout(addGardenTipCloseTimer);
+            addGardenTipCloseTimer = null;
+          }
+          if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            finishHide();
+            return;
+          }
+          addGardenTipBanner.classList.add("add-garden-tip--closing");
+          addGardenTipCloseTimer = window.setTimeout(finishHide, ADD_GARDEN_TIP_CLOSE_MS);
+        });
+      }
+
+      var nameInput = document.getElementById("add-garden-name-input");
+      var nameClearBtn = document.getElementById("add-garden-name-clear");
+      if (nameClearBtn && nameInput) {
+        nameClearBtn.addEventListener("click", function () {
+          nameInput.value = "";
+          nameInput.focus();
+        });
+      }
+
+      var agPhotoEdit = document.querySelector(".add-garden__photo-edit");
+      if (agPhotoEdit && nameInput) {
+        agPhotoEdit.addEventListener("click", function () {
+          nameInput.focus();
+        });
+      }
+
+      if (pageAddGarden) {
+        syncAddGardenAdoptedField();
+      }
     })();
   </script>
 </body>
