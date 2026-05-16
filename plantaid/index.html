@@ -835,13 +835,6 @@
       border: 1px solid var(--wt20);
     }
 
-    /* Active call doctor bubble (#vc-processing-card): allow wrapped typewriter without clipping joining row */
-    #vc-processing-card.vc-processing-card--doctor {
-      height: auto;
-      min-height: 100px;
-      max-height: 260px;
-    }
-
     .vc-processing-card--doctor .vc-active-lottie-host {
       display: none;
     }
@@ -883,10 +876,14 @@
       z-index: 17;
     }
 
-    @keyframes vc-joining-connecting-fade {
+    /*
+     * 底部标题槽 · PlantAid/Title/20 · Figma 8543:11274（Connecting…）与 8543:10905（Please…）
+     * 两段共用同一循环：ease-in-out 淡入淡出
+     */
+    @keyframes vc-hint-caption-fade-io {
       0%,
       100% {
-        opacity: 0.3;
+        opacity: 0;
       }
 
       50% {
@@ -894,10 +891,10 @@
       }
     }
 
-    /* Joining buffer：Connecting… 淡入淡出循环（Figma 8543:11274） */
+    /* Joining：Connecting… — 与接通态语音提示同一套脉冲 */
     .vc-phase--joining:not([aria-hidden="true"]) .vc-joining-caption.vc-call-hint {
       transition-property: transform, visibility;
-      animation: vc-joining-connecting-fade 2.4s ease-in-out infinite;
+      animation: vc-hint-caption-fade-io 2.4s ease-in-out infinite;
     }
 
     .vc-joining-caption {
@@ -921,9 +918,10 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .vc-phase--joining:not([aria-hidden="true"]) .vc-joining-caption.vc-call-hint {
+      .vc-phase--joining:not([aria-hidden="true"]) .vc-joining-caption.vc-call-hint,
+      .vc-voice-hint.vc-voice-hint--visible {
         animation: none !important;
-        opacity: 1;
+        opacity: 1 !important;
       }
     }
 
@@ -958,10 +956,29 @@
       scrollbar-width: none;
     }
 
-    /* Joining spacer + user lane stay at Figma row height */
-    .vc-processing-card.vc-joining-card .vc-processing-text-wrap,
-    .vc-processing-card--user .vc-processing-text-wrap {
+    /* Joining buffer：占位格与整条 100px 行对齐 */
+    .vc-processing-card.vc-joining-card .vc-processing-text-wrap {
       max-height: calc(100px - 24px);
+    }
+
+    /*
+     * 接通态字幕气泡：卡片总高固定 100px · 正文可视区三行高；
+     * 超出时在区内纵向滚动，打字时由 scrollVcProcessingToBottom 贴底。
+     */
+    #vc-processing-card .vc-processing-text-wrap {
+      flex: 0 0 auto;
+      height: calc(18px * 1.4 * 3);
+      max-height: calc(18px * 1.4 * 3);
+      min-height: 0;
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    #vc-processing-card .vc-processing-typewriter {
+      word-break: break-word;
+      overflow-wrap: anywhere;
     }
 
     .vc-processing-text-wrap::-webkit-scrollbar {
@@ -1031,29 +1048,25 @@
       font-weight: 590;
     }
 
-    /* 同槽 · active：listening 时出现；2s 淡入，首轮「全亮停留」与脚本 delay 对齐（淡入 + 3s） */
+    /*
+     * 同槽 · active：listening 语音提示 — 与 joining「Connecting…」同一套 vc-hint-caption-fade-io
+     * 演示脚本 delay 仍为 2400ms（一周）+ 2600ms 停留 ≈ 5s，再切用户字幕
+     */
     .vc-voice-hint {
       opacity: 0;
       visibility: hidden;
-      transition:
-        opacity 2s ease,
-        visibility 2s ease;
+      animation: none;
     }
 
     .vc-voice-hint.vc-voice-hint--visible {
-      animation: none;
-      opacity: 1;
       visibility: visible;
+      animation: vc-hint-caption-fade-io 2.4s ease-in-out infinite;
     }
 
     #page-video-call[data-vc-subtitles="collapsed"] .vc-voice-hint.vc-voice-hint--visible {
+      animation: none !important;
       opacity: 0;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .vc-voice-hint {
-        transition-duration: 0.01ms;
-      }
+      visibility: hidden;
     }
 
     .vc-active-lottie-host {
@@ -1398,47 +1411,32 @@
       flex-shrink: 0;
     }
 
-    .screen[data-active-page="garden"] .page-dock__fab:not(.page-dock__fab--add-entry),
-    .screen[data-active-page="add-garden"] .page-dock__fab:not(.page-dock__fab--add-entry) {
+    /* Garden / Add to Garden：四键同一规范；选中仅提亮底 / 图标色，无额外外描边 */
+    .screen[data-active-page="garden"] .page-dock__fab,
+    .screen[data-active-page="add-garden"] .page-dock__fab {
       background: rgba(242, 245, 243, 0.98);
       color: var(--bk40);
-    }
-
-    .screen[data-active-page="garden"] .page-dock__fab.page-dock__fab--add-entry,
-    .screen[data-active-page="add-garden"] .page-dock__fab.page-dock__fab--add-entry {
-      background: rgba(214, 234, 222, 0.95);
-      color: var(--brand);
-      box-shadow: inset 0 0 0 1.5px rgba(31, 98, 70, 0.35);
-    }
-
-    .screen[data-active-page="add-garden"] .page-dock__fab.page-dock__fab--add-entry.is-active {
-      box-shadow:
-        inset 0 0 0 1.5px rgba(31, 98, 70, 0.35),
-        0 0 0 2px rgba(31, 98, 70, 0.42);
-    }
-
-    .screen[data-video-dock-active="true"] .page-dock__fab.page-dock__fab--add-entry {
-      background: rgba(255, 255, 255, 0.14);
-      color: rgba(255, 255, 255, 0.92);
-      box-shadow: none;
+      box-shadow: inset 0 0 0 1px rgba(13, 14, 18, 0.1);
     }
 
     .screen[data-active-page="garden"] .page-dock__fab.is-active,
     .screen[data-active-page="add-garden"] .page-dock__fab.is-active {
-      background: rgba(31, 98, 70, 0.14);
+      background: rgba(31, 98, 70, 0.12);
       color: var(--brand);
-      box-shadow: 0 0 0 2px rgba(31, 98, 70, 0.42);
+      box-shadow: inset 0 0 0 1px rgba(13, 14, 18, 0.1);
     }
 
+    /* 通话浮层 Dock：同色玻璃 + 同一内描边；选中不改变描边粗细 */
     .screen[data-video-dock-active="true"] .page-dock__fab {
       background: rgba(255, 255, 255, 0.16);
       color: rgba(255, 255, 255, 0.92);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
     }
 
     .screen[data-video-dock-active="true"] .page-dock__fab.is-active {
       background: rgba(255, 255, 255, 0.42);
       color: var(--wt100);
-      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.65);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
     }
 
     .page-dock__fab:hover {
@@ -1616,6 +1614,10 @@
       flex-shrink: 0;
     }
 
+    .action-sheet-badge.action-sheet-badge--dismissed {
+      display: none !important;
+    }
+
     .action-sheet-row-chevron {
       flex-shrink: 0;
       font-family: "Rco", sans-serif;
@@ -1755,7 +1757,8 @@
       width: 294px;
       max-width: calc(100% - 48px);
       margin: 0 auto;
-      padding: 0 0 28px;
+      /* Name → primary CTA gap Figma 8601（标注 20） */
+      padding: 0 0 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1800,6 +1803,10 @@
       gap: 10px;
     }
 
+    .identified-plant-sheet__copy p {
+      margin: 0;
+    }
+
     .identified-plant-sheet__lead {
       font-weight: 590;
       font-size: 18px;
@@ -1821,7 +1828,7 @@
     .identified-plant-sheet__footer {
       flex-shrink: 0;
       width: 100%;
-      padding: 8px 0 0;
+      padding: 0;
       background: #ffffff;
       display: flex;
       flex-direction: column;
@@ -2178,10 +2185,10 @@
       text-align: left;
     }
 
-    /* Plant name / adopted — text field chrome (Figma 8601:16889 · func brand 5) */
+    /* Plant name / adopted — text field chrome (Figma 8601:16889 · func brand 5 · stroke 1) */
     .add-garden__input {
       width: 100%;
-      border: none;
+      border: 1px solid rgba(31, 98, 70, 0.14);
       border-radius: 16px;
       background: var(--func-brand5);
       padding: 10px 44px 10px 20px;
@@ -2203,7 +2210,8 @@
     }
 
     .add-garden__input:focus-visible {
-      box-shadow: 0 0 0 2px rgba(31, 98, 70, 0.22);
+      border-color: var(--success);
+      box-shadow: none;
     }
 
     .add-garden__input:read-only {
@@ -2691,6 +2699,55 @@
       overflow: visible;
     }
 
+    /*
+     * Figma · btm_tab 8543:10811 / scan 文案节点 top 54；
+     * 设计要求相对稿面上移 4px → top 50。
+     */
+    .tab-scan-diagnose-label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50px;
+      height: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-sans);
+      font-weight: 590;
+      font-size: 10px;
+      line-height: 1;
+      font-variation-settings: "wdth" 100;
+      letter-spacing: 0;
+      text-align: center;
+      white-space: nowrap;
+      color: var(--bk40);
+      pointer-events: none;
+      z-index: 1;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Diagnose scan 红点 · Figma 8543:10813（10×10），相对槽右上基准：左移 6px、下移 6px */
+    .tab-scan-notification-dot {
+      position: absolute;
+      top: -4px;
+      right: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      box-sizing: border-box;
+      background: var(--danger);
+      box-shadow: 0 0 0 2px var(--wt100);
+      pointer-events: none;
+      z-index: 3;
+      flex-shrink: 0;
+    }
+
+    .tab-scan-notification-dot.tab-scan-notification-dot--dismissed {
+      display: none !important;
+    }
+
     /* 8617:3585 Scan_Btn — 80×60 border-box（含 6px 白边），rounded 24（Dev） */
     .tab-scan-btn {
       position: absolute;
@@ -2717,6 +2774,7 @@
       cursor: pointer;
       text-decoration: none;
       -webkit-tap-highlight-color: transparent;
+      z-index: 2;
     }
 
     /* FAB glyphs: 8617:3586 scan (38px) ↔ 8593:8132 close \\uE92A (30px) */
@@ -2871,7 +2929,15 @@
         <span class="action-sheet-row-body">
           <span class="action-sheet-row-label">Video Call</span>
           <span class="action-sheet-row-trail">
-            <img class="action-sheet-badge" src="assets/list-row-badge.svg" alt="" width="10" height="10" decoding="async" />
+            <img
+              class="action-sheet-badge"
+              id="action-sheet-video-call-badge"
+              src="assets/list-row-badge.svg"
+              alt=""
+              width="10"
+              height="10"
+              decoding="async"
+            />
             <span class="action-sheet-row-chevron" aria-hidden="true">&#xe901;</span>
           </span>
         </span>
@@ -2880,10 +2946,7 @@
         <span class="action-sheet-row-icon" aria-hidden="true">&#xe99b;</span>
         <span class="action-sheet-row-body">
           <span class="action-sheet-row-label">Chatbot</span>
-          <span class="action-sheet-row-trail">
-            <img class="action-sheet-badge" src="assets/list-row-badge.svg" alt="" width="10" height="10" decoding="async" />
-            <span class="action-sheet-row-chevron" aria-hidden="true">&#xe901;</span>
-          </span>
+          <span class="action-sheet-row-chevron" aria-hidden="true">&#xe901;</span>
         </span>
       </button>
     </aside>
@@ -3189,6 +3252,8 @@
           <span class="tab__label">Calendar</span>
         </div>
         <div class="tab-scan-slot">
+          <span class="tab-scan-notification-dot" id="tab-scan-notification-dot" aria-hidden="true"></span>
+          <p class="tab-scan-diagnose-label">Diagnose</p>
           <button
             type="button"
             class="tab-scan-btn"
@@ -3327,6 +3392,8 @@
       var vcFocusHideTimer = null;
       var vcCameraFlipTimerA = null;
       var vcCameraFlipTimerB = null;
+      var SCAN_DIAGNOSE_DOT_LS_KEY = "plantaid-diagnose-scan-dot-dismissed";
+      var ACTION_SHEET_VIDEO_CALL_BADGE_LS_KEY = "plantaid-action-sheet-video-call-badge-dismissed";
       var VC_DOCTOR_PART1 = "Hi! I'm your plant doctor.";
       var VC_DOCTOR_PART2 = " Let's take a look at your plant and see how it's doing!";
       var VC_PROCESSING_MESSAGE = VC_DOCTOR_PART1 + VC_DOCTOR_PART2;
@@ -3787,7 +3854,9 @@
       function scrollVcProcessingToBottom() {
         var wrap = document.getElementById("vc-processing-text-wrap");
         if (!wrap) return;
-        wrap.scrollTop = wrap.scrollHeight;
+        requestAnimationFrame(function () {
+          wrap.scrollTop = wrap.scrollHeight;
+        });
       }
 
       function stopVcTypewriter() {
@@ -3904,9 +3973,9 @@
 
         var pauseAfterDoctor = 520;
         var pauseAfterUser = 640;
-        /** 首轮：模拟未及时开口 — 2s 淡入（.vc-voice-hint）后再全亮停留 3s，再打字；第二轮不再提示 */
-        var vcVoiceHintFadeInMs = 2000;
-        var pauseSpeakHintFirstHoldMs = 3000;
+        /** 首轮：语音提示与 joining「Connecting…」同周期 2.4s × 一周后 + ~2.6s 再打字 */
+        var vcVoiceHintPulseMs = 2400;
+        var pauseSpeakHintFirstHoldMs = 2600;
 
         runVcBubbleTypewriter({
           speaker: "doctor",
@@ -3921,7 +3990,7 @@
                 onDone: function () {
                   delayVcSpeech(pauseAfterDoctor, function () {
                     setVcVoiceHintVisible(true);
-                    delayVcSpeech(vcVoiceHintFadeInMs + pauseSpeakHintFirstHoldMs, function () {
+                    delayVcSpeech(vcVoiceHintPulseMs + pauseSpeakHintFirstHoldMs, function () {
                       runVcBubbleTypewriter({
                         speaker: "user",
                         message: VC_USER_MESSAGE,
@@ -4219,7 +4288,10 @@
         var videoOn = isDockVideoPage(page);
         var addGardenActive = page === "add-garden";
         var openIdentifiedSheet =
-          page === "garden" && prevWasVideo && !opts.skipPostCallSheet;
+          page === "garden" &&
+          prevWasVideo &&
+          prevPage === "video-in-call" &&
+          !opts.skipPostCallSheet;
 
         root.dataset.activePage = page;
         root.dataset.videoDockActive = videoOn ? "true" : "false";
@@ -4299,7 +4371,52 @@
       }
       syncDockCollapsedAria();
 
+      function initScanDiagnoseNotificationDot() {
+        var dot = document.getElementById("tab-scan-notification-dot");
+        if (!dot) return;
+        try {
+          if (window.localStorage.getItem(SCAN_DIAGNOSE_DOT_LS_KEY) === "1") {
+            dot.classList.add("tab-scan-notification-dot--dismissed");
+            dot.setAttribute("aria-hidden", "true");
+          }
+        } catch (ignore) {}
+      }
+
+      function dismissScanDiagnoseNotificationDot() {
+        var dot = document.getElementById("tab-scan-notification-dot");
+        if (!dot || dot.classList.contains("tab-scan-notification-dot--dismissed")) return;
+        dot.classList.add("tab-scan-notification-dot--dismissed");
+        dot.setAttribute("aria-hidden", "true");
+        try {
+          window.localStorage.setItem(SCAN_DIAGNOSE_DOT_LS_KEY, "1");
+        } catch (ignore) {}
+      }
+
+      initScanDiagnoseNotificationDot();
+
+      function initActionSheetVideoCallBadge() {
+        var badge = document.getElementById("action-sheet-video-call-badge");
+        if (!badge) return;
+        try {
+          if (window.localStorage.getItem(ACTION_SHEET_VIDEO_CALL_BADGE_LS_KEY) === "1") {
+            badge.classList.add("action-sheet-badge--dismissed");
+          }
+        } catch (ignore) {}
+      }
+
+      function dismissActionSheetVideoCallBadge() {
+        var badge = document.getElementById("action-sheet-video-call-badge");
+        if (!badge || badge.classList.contains("action-sheet-badge--dismissed")) return;
+        badge.classList.add("action-sheet-badge--dismissed");
+        try {
+          window.localStorage.setItem(ACTION_SHEET_VIDEO_CALL_BADGE_LS_KEY, "1");
+        } catch (ignore) {}
+      }
+
+      initActionSheetVideoCallBadge();
+
       toggle.addEventListener("click", function () {
+        dismissScanDiagnoseNotificationDot();
         setOpen(!root.classList.contains("action-sheet-open"));
       });
 
@@ -4321,6 +4438,7 @@
       sheet.querySelectorAll(".action-sheet-row").forEach(function (row) {
         row.addEventListener("click", function () {
           var nav = row.getAttribute("data-nav-page");
+          if (nav === "video-dialing") dismissActionSheetVideoCallBadge();
           if (nav) setActivePage(nav);
           else setOpen(false);
         });

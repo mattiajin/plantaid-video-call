@@ -20,6 +20,12 @@
 | §17 | Video · 通话计时器（脚本） |
 | §18 | 音频（铃声循环 / 挂断音效 / 收起免挂断音） |
 | §19 | 左侧 Dock（收起 / 折叠箭头 / FAB hover） |
+| §20 | Video · 拨打界面 vs 接通界面 `.vc-call-screen` 图层过渡 |
+| §21 | Video · 翻转相机（`rotateY` keyframes + 根节点 class） |
+| §22 | Video · 点按对焦框 `vc-focus-frame-pop` |
+| §23 | Video · 底部标题淡入淡出 `vc-hint-caption-fade-io` |
+| §24 | Identified sheet + Add To Garden 页面上滑 / 遮罩 |
+| §25 | 脚本交互索引 |
 
 ---
 
@@ -136,7 +142,7 @@
 - `.screen:not(.action-sheet-open) .action-sheet-row`：**`opacity: 1`**、**`transform: none`**
 - 展开态 FAB：`--scan` / `--close` 无过渡瞬时切换
 
-Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-motion 规则（见 §12–§13、§15）。
+Video 相关另有 `.vc-phase`、Connecting 胶囊、`vc-info`、**§20–§24**（拨打/接通 UI、相机翻转、对焦、字幕循环、识别抽屉）等的 reduced-motion 规则（见 §12–§13、§15 及后文 §20+）。
 
 ---
 
@@ -144,7 +150,7 @@ Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-
 
 - **`aria-expanded`** / **`aria-label`**（「Quick actions」↔「Close quick actions」）
 - **`aria-hidden`**：`sheet`、`backdrop`
-- **键盘**：`Escape`（在 Garden 页）收起面板
+- **键盘**：`Escape`（在 Garden 页）收起面板；在 Video 页优先用于离开通话（见 §11）
 
 ---
 
@@ -158,12 +164,12 @@ Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-
 | `plantaid/assets/status-bar.png` | 状态栏位图（Video 内需反白处理） |
 | `plantaid/assets/tab-home-indicator.svg` | Home Indicator |
 | `plantaid/assets/loading-spinner-dots.json` | Lottie 备选路径（连接中大.loader） |
-| `plantaid/assets/three-dots-loading.json` | Lottie 备选路径（接通后顶部条） |
-| `plantaid/assets/ring-marimba-universfield-487903.mp3` | 等待接通铃声（循环） |
+| `plantaid/assets/three-dots-loading.json` | Lottie 备选路径（**`joining` / `active` 会话条**共用三点动画） |
+| `plantaid/assets/ring-marimba-universfield-487903.mp3` | 等待接通铃声（**仅在 `connecting`** 相位循环） |
 | `plantaid/assets/end-call-z31mph1yzr-120633.mp3` | 挂断音效（单次） |
 | **CDN** | `lottie-web` **5.12.2**（`cdnjs`）；离线需改本地副本 |
 
-内联 JSON：`#vc-lottie-data`（连接 Loader）、`#vc-active-lottie-data`（接通后三点），避免 `file://` 下无法加载外部 JSON。
+内联 JSON：**`#vc-connecting-lottie-data`**（连接中大圆点 Loader）、**`#vc-active-lottie-data`**（**`#vc-joining-lottie` / `#vc-active-lottie`** 共用三点数据源），避免 `file://` 下无法加载外部 JSON。
 
 ---
 
@@ -179,50 +185,50 @@ Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-
 |------|------|
 | **Figma · 连接中** | [M3.0.1 · 8543:10380](https://www.figma.com/design/13xynwNrbY414RYKcDNrv8/PlantAID?node-id=8543-10380) |
 | **Figma · 接通后** | [M3.0.1_Scanning · 8543:11257](https://www.figma.com/design/13xynwNrbY414RYKcDNrv8/PlantAID?node-id=8543-11257) |
-| **根节点** | `#app-screen`，`data-active-page="garden"` \| `"video-call"` |
-| **页面** | `#page-garden` / `#page-video-call`，激活 **`is-active`** |
+| **根节点** | `#app-screen`，**`data-active-page`**：**`garden`** \| **`video-dialing`** \| **`video-in-call`** \| **`add-garden`** |
+| **页面** | **`#page-garden`** · **`#page-video-call`** · **`#page-add-garden`**，激活 **`is-active`** |
 | **页面过渡** | `.page`：`opacity` **0.24s** `ease`，配合 `visibility` / `pointer-events` |
-| **进入 Video** | 菜单 **`data-nav-page="video-call"`**；Dock **`data-page="video-call"`** |
-| **回 Garden** | Dock **`data-page="garden"`**；连接中挂断 **`#vc-hangup`**；接通后 **`#vc-active-hangup`**；**`Escape`**（优先离开 Video） |
-| **收起通话 UI** | **`#vc-call-minimize`** → 回 Garden，**不播放**挂断音效（`skipHangSound`） |
-| **通话阶段** | `#page-video-call` 上 **`data-video-phase="connecting"`** \| **`"active"`**（§15） |
+| **进入 Video（拨打）** | 快捷菜单 **`data-nav-page="video-dialing"`**；Dock **`data-page="video-dialing"`**（接通后 Dock 会因相位同步为 **`video-in-call`**） |
+| **回 Garden** | Dock **`data-page="garden"`**；拨打中断 **`#vc-hangup`**（`.vc-connecting-end-call`）；接通后挂断（含 **`#vc-active-hangup`**）；**`Escape`**（优先离开 Video） |
+| **收起通话 UI** | **`#vc-call-minimize`** 等 → 回 Garden，**不播放**挂断音效（`skipHangSound`） |
+| **通话阶段** | `#page-video-call`：**`data-video-phase="connecting"`** \| **`"joining"`** \| **`"active"`**（§15、§20） |
 
 ---
 
 ## 12. Video · 连接中阶段 + 「Connecting」胶囊脉冲
 
-**范围**：`.vc-phase--connecting`（模糊背景、深色 scrim、头像、`Connecting…` 胶囊、说明卡片、大号 Lottie、单枚挂断）。
+**范围**：`.vc-phase--connecting`（拨打中界面、大号 Lottie、说明卡片、`Connecting…` 胶囊、`#vc-hangup` / `.vc-connecting-end-call` 等）。
 
-**`@keyframes vc-connect-pulse`**
+**`@keyframes vc-connect-pill-pulse`**
 
-| keyframe | `opacity` |
-|----------|---------|
-| 0%, 100% | **0.78** |
-| 50% | **1** |
+| keyframe | `opacity` | `border-color`（胶囊描边） |
+|----------|-----------|----------------------------|
+| 0%, 100% | **1** | `rgba(255,255,255,0.2)` |
+| 50% | **0.55** | `rgba(255,255,255,0.42)` |
 
-**应用**：`.vc-connect-pill`，**`animation`：`vc-connect-pulse` · 2.2s · `ease-in-out` · `infinite`**；**`cursor: pointer`**（可跳过等待接入接通态）。
+**应用**：**`.vc-phase--connecting:not([aria-hidden="true"]) .vc-connect-pill`** — **`animation: vc-connect-pill-pulse 1.2s ease-in-out infinite`**；离开 connecting 相位后不再有动画。**`cursor: pointer`**（可立即 `advanceVcToJoining()` 跳过等待）。
 
-**`:focus-visible`**：白色outline，便于键盘跳过。
+**`:focus-visible`**：**2px** 白色描边，`outline-offset: 3px`。
 
-**`prefers-reduced-motion`**：`animation: none`，`opacity: 1`。
+**`prefers-reduced-motion`**：**`animation: none !important`**，**`opacity: 1`**，描边复位为 **`rgba(255,255,255,0.2)`**。
 
 ---
 
-## 13. Video · 提示卡片（`#vc-info-card`）关闭
+## 13. Video · 提示卡片（`#vc-info-card`）显示 / 关闭
 
-**展开**：`opacity: 1`，`transform: translate(-50%, 0) scale(1)`，`visibility: visible`。
+**常态（展开）**：`opacity: 1`，`transform: translate(-50%, 0) scale(1)`，`visibility: visible`，`transition`：**`opacity` 0.28s**、`cubic-bezier(0.33, 1, 0.68, 1)`；**`transform` 0.32s**，同上 easing；**`visibility`** 瞬时。
 
 **收起（`.vc-info--hidden`）**
 
 | 属性 | 过渡 |
 |------|------|
-| `opacity` | **~0.26s**，`cubic-bezier(0.32, 0, 0.67, 0)` |
-| `transform` | **~0.3s**，同上 → `translate(-50%, 14px) scale(0.93)` |
-| `visibility` | **延迟 ~0.3s** 再 `hidden`，避免未播完即不可见 |
+| `opacity` | **0.26s**，`cubic-bezier(0.32, 0, 0.67, 0)` |
+| `transform` | **0.3s**，同上 → `translate(-50%, 14px) scale(0.93)` |
+| `visibility` | **`hidden`** 延后 **linear 0.3s**，避免淡出未完成即不可交互 |
 
-**关闭按钮**：`hover` 提亮；**`active`**：`scale(0.88)`、`opacity: 0.85`。
+**关闭按钮**：**`transition`** transform / color / opacity 各 **0.2s**；**`hover`** 提亮；**`active`**：`scale(0.88)`、`opacity: 0.85`。
 
-**`prefers-reduced-motion`**：极短过渡；收起时去掉位移缩放（仅瞬时淡出语义）。
+**`prefers-reduced-motion`**：过渡时长缩至 **0.01ms**，延迟清零；收起时 **`transform`** 复位为 **`translate(-50%, 0) scale(1)`**（仅淡出语义）。
 
 ---
 
@@ -230,49 +236,49 @@ Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-
 
 | 项目 | 说明 |
 |------|------|
-| **容器** | `#vc-lottie.vc-lottie`（外包 `.vc-loader`，约 **168×168**） |
-| **库** | `lottie-web`，**`renderer: svg`**，`loop: true`，**`autoplay: false`**（由脚本 `play()`） |
-| **数据源** | 优先 **`animationData`**：`#vc-lottie-data`（内联 JSON）；否则 **`path`**：`assets/loading-spinner-dots.json` |
-| **视觉** | SVG **`drop-shadow`** 增强白点在深色背景上的可读性 |
-| **生命周期** | 进入 Video **连接中**且脚本就绪后播放；离开 Video **`pause`**；切入 **接通后**阶段 **`pause`** |
+| **宿主** | **`#vc-connecting-lottie.vc-connecting-lottie-host`**（置于 **`.vc-loader`**，约 **140×140**） |
+| **库** | `lottie-web`，**`renderer: svg`**，`loop: true`，**`autoplay: false`**（由脚本 **`play()`**） |
+| **数据源** | 优先 **`animationData`**：内联 **`#vc-connecting-lottie-data`**；否则 **`path`**：**`VC_LOTTIE_DIALING_PATH`**（一般为 `assets/loading-spinner-dots.json`） |
+| **生命周期** | 脚本 **`ensureVcConnectingLottie`**；**`connecting`** 相位内择机播放；进入 **`joining` / active**、离开页面时 **`pause`** |
 
 ---
 
-## 15. Video · 接通后阶段 UI + 阶段切换
+## 15. Video · 相位 UI + 流程（connecting · joining · active）
 
-**DOM**：`.vc-phase--active`（与 `.vc-phase--connecting` 同页叠加，`absolute inset 0`）。
+**三组相位层**：`.vc-phase--connecting`、`.vc-phase--joining`、`.vc-phase--active` 叠在同一 `#page-video-call` 内；**`data-video-phase`** 控制哪一层可视（与 **§20** 的 **`data-vc-screen`** 拨打 / 接通 UI **配合**，并非重复）。
 
-**状态**：`#page-video-call[data-video-phase="active"]` 显示接通 UI；`connecting` 显示连接 UI。
+**`data-video-phase`**
 
-**切换**
+| 值 | 语义（摘要） |
+|----|----------------|
+| `connecting` | 拨打中：连接 Lottie、`#vc-hangup` / `.vc-connecting-end-call`，铃声等在脚本中驱动 |
+| `joining` | 接通缓冲：顶部 **`#vc-joining-card`**、**`#vc-joining-lottie`**、底部「Connecting…」字幕轨道 |
+| `active` | 通话中：计时器、字幕 **`#vc-processing-card`**、**`#vc-active-lottie`** 等 |
+
+**切换（脚本）**
 
 | 触发 | 行为 |
 |------|------|
-| **定时器** | 进入 Video **连接中**后 **~3.8s** 自动 `advanceVcToActive()` |
-| **点击 / Enter / Space** | `#vc-connect-pill` 立即接通 |
-| **离开 Video** | `vcMediaLeave()` → 重置为 **`connecting`**，清除定时器 |
+| **`vcMediaEnter()`**（进入拨打 Video） | **`setVideoPhase("connecting")`**；约 **5s** 后 **`advanceVcToJoining()`** → **`joining`**；再 **2s** 后 **`advanceVcFromJoiningToActive()`** → **`active`** |
+| **`#vc-connect-pill`**（点击 / Enter / Space） | 若仍在 **`connecting`** → **`advanceVcToJoining()`**（跳过 5s 等待） |
+| **离开 Video** | **`vcMediaLeave()`** → 复位 **`connecting`**，清除上述定时器 |
 
-**`.vc-phase` CSS 过渡**：**`opacity` + `visibility` · ~0.28s** `ease`；非当前阶段 **`pointer-events: none`**。
+**`.vc-phase` CSS**：**`opacity` + `visibility`** 各 **0.28s** `ease`；非当前相位 **`pointer-events: none`**。
 
-**`prefers-reduced-motion`**：`.vc-phase` **`transition-duration: 0.01ms`**。
+**`prefers-reduced-motion`**：`.vc-phase` 等 **`transition-duration: 0.01ms`**（见 `index.html` 内 `@media` 块）。
 
-**接通后视觉要点**
-
-- 清晰全屏背景 **`.vc-active-bg`**（无 blur）
-- **顶/底渐变**：`.vc-active-grad-top`（100px）、`.vc-active-grad-bottom`（300px），`rgba(0,0,0,0.4)` → 透明
-- **顶栏**：`.vc-call-nav` — 计时 `#vc-call-timer`、收起 `#vc-call-minimize`
-- **顶部卡片**：`.vc-processing-card` — `chief20` + blur + 白描边；左侧小号 Lottie 宿主 **`#vc-active-lottie`**
-- **底部三钮**：`.vc-active-controls` — 挂断（危险色图标）、翻转相机、手电筒（后两者仅占位）
+**其它相关过渡（未单列章节）**：字幕折叠 **`data-vc-subtitles`**（`#vc-processing-card` 等 opacity / transform）；CC 切换图标 **`.vc-sub-toggle-icon`**（约 **0.26s / 0.28s**）；卡片背景字色 **`#page-video-call[data-vc-call-ui="listening"]`** 等——均以 **`index.html`** 为准。
 
 ---
 
-## 16. Video · Lottie（接通后 · 顶部三点条）
+## 16. Video · Lottie（接通缓冲 / 会话顶栏 · Three dots）
 
 | 项目 | 说明 |
 |------|------|
-| **容器** | `#vc-active-lottie.vc-active-lottie-host`（约 **59×24**） |
-| **数据源** | **`#vc-active-lottie-data`**（内联）；备选 **`assets/three-dots-loading.json`** |
-| **播放** | 进入 **`data-video-phase="active"`** 后 **`play()`**；回到 **`connecting`** 或离开页面 **`pause`** |
+| **Joining 宿主** | **`#vc-joining-lottie.vc-active-lottie-host`**（约 **59×24**，在 **`#vc-joining-card`** 内可见） |
+| **Active 宿主** | **`#vc-active-lottie.vc-active-lottie-host`**（同上尺寸，会话加载态使用） |
+| **数据源** | 共用内联 **`#vc-active-lottie-data`**；否则 **`VC_LOTTIE_SUBTITLES_LOADING_PATH`**（`assets/three-dots-loading.json`） |
+| **脚本** | **`ensureVcJoiningLottie`**（**`joining`** 相位 **`play()`**）；**`ensureVcActiveLottie`**（**`active`** 需要时 **`play()`**）；离开相位或离开时 **`pause`** |
 
 ---
 
@@ -290,7 +296,7 @@ Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-
 
 | ID | 文件 | 行为 |
 |----|------|------|
-| **`#vc-ring-audio`** | `ring-marimba-universfield-487903.mp3` | **`loop`**；进入 Video **连接中** **`play()`**；**接通后**或离开 **`pause`** + `currentTime = 0` |
+| **`#vc-ring-audio`** | `ring-marimba-universfield-487903.mp3` | **`loop`**；**`connecting`** 相位 **`play()`**；进入 **`joining`** 或 **`active`**、或离开 Video 时 **`pause`** + `currentTime = 0` |
 | **`#vc-end-call-audio`** | `end-call-z31mph1yzr-120633.mp3` | **单次**；从 Video **返回 Garden** 且 **`skipHangSound` 为假**时播放（挂断/FAB/Escape）；**`#vc-call-minimize`** 使用 **`skipHangSound: true`** |
 
 自动播放受限时，`play()` Promise **`catch`** 静默处理。
@@ -319,14 +325,117 @@ Video 相关另有 `.vc-phase`、`Connecting` 胶囊、`vc-info` 等的 reduced-
 
 ---
 
-## 20. 脚本交互索引（便于检索）
+## 20. Video · `.vc-call-screen`（拨打图层 vs 接通图层）
+
+**DOM**：**`.vc-call-screen--dialing`** 与 **`.vc-call-screen--in-call`** 叠放在 `#page-video-call` 内。
+
+**状态钩子**：**`data-vc-screen="dialing"`** \| **`"in-call"`** — 由 **`syncVcCallScreenContext()`** 根据 **`data-video-phase`** 同步（**`connecting` → `dialing`**；**`joining` / `active` → `in-call`**）。
+
+**`.vc-call-screen` 过渡**
+
+| 属性 | 时长 | easing |
+|------|------|--------|
+| `opacity` | **0.38s** | `cubic-bezier(0.32, 0.72, 0, 1)` |
+| `visibility` | **0.38s** | `ease` |
+| `transform` | **0.38s** | `cubic-bezier(0.32, 0.72, 0, 1)` |
+
+**典型关键帧**（其一隐藏时）：隐藏层带轻微 **`translateY` ±10~12px** 与 **`scale` 0.98~1.02**，形成上下错落切换（详见 `index.html` 选择器）。
+
+**`prefers-reduced-motion`**：**`#page-video-call .vc-call-screen`** 的 **`transition-duration: 0.01ms !important`**。
+
+---
+
+## 21. Video · 翻转相机（`vc-camera-flip-out` / `vc-camera-flip-in`）
+
+**目标元素**：**`.vc-phase--joining` / `.vc-phase--active`** 内 **`.vc-active-bg img`**（`transform-origin: center`，`backface-visibility: hidden`）。
+
+**`@keyframes`**
+
+| 名称 | 路径 | 时长 / 曲线 |
+|------|------|----------------|
+| **`vc-camera-flip-out`** | `rotateY(0deg)` → **`90deg`** | **420ms** · `cubic-bezier(0.45, 0, 0.55, 1)` · **`forwards`** |
+| **`vc-camera-flip-in`** | `rotateY(-90deg)` → **`0deg`** | 同上 |
+
+**类名（根节点）**：`#page-video-call` 依次加上 **`vc-camera-flip-out`** →（半周后换图）→ **`vc-camera-flip-in`**；常量 **`VC_CAMERA_FLIP_HALF_MS = 420`** 与单程动画等长。**`prefersReducedMotion()`** 为真时：**`toggleVcCameraFacing`** 直接换前后摄 **不附加**动画类。
+
+**`prefers-reduced-motion`（CSS）**：上述 **`img`** **`animation: none !important`**。
+
+---
+
+## 22. Video · 点按对焦框 **`vc-focus-frame-pop`**
+
+**元素**：每层 **`.vc-focus-hit`** 内的 **`.vc-focus-frame`**。
+
+**触发**：点击命中层 → **`vc-focus-frame--visible`** · **`animation: vc-focus-frame-pop 0.22s ease-out both`**。
+
+**`@keyframes vc-focus-frame-pop`**：**`from`** `opacity: 0`，`transform: scale(1.06)` → **`to`** `opacity: 1`，`scale(1)`。
+
+**`prefers-reduced-motion`**：可见态 **`animation: none`**（瞬时出现）。
+
+---
+
+## 23. Video · 底部标题淡入淡出 **`vc-hint-caption-fade-io`**
+
+**`@keyframes vc-hint-caption-fade-io`**：**0% / 100%** `opacity: 0` → **50%** `opacity: 1`（呼吸循环）。
+
+**应用**
+
+| 场景 | 选择器 / 条件 | `animation` |
+|------|----------------|-------------|
+| Joining ·「Connecting…」 | **`.vc-phase--joining:not([aria-hidden="true"]) .vc-joining-caption.vc-call-hint`** | **`vc-hint-caption-fade-io 2.4s ease-in-out infinite`**（另保留 **`.vc-joining-caption`** 的 opacity / transform **过渡**，用于折叠字幕等） |
+| Active · 语音提示 | **`.vc-voice-hint.vc-voice-hint--visible`** | 同上 **2.4s** 循环 |
+| 禁用 | **`#page-video-call[data-vc-subtitles="collapsed"]`** 下相关节点 | **`animation: none !important`** 等 |
+
+**`prefers-reduced-motion`**：Joining 字幕与 **`.vc-voice-hint--visible`** **`animation: none !important`**，**`opacity: 1 !important`**（保留可读性）。
+
+---
+
+## 24. Post-call · Identified sheet + Add To Garden
+
+**设计对照（识别抽屉）**：[8601:16480](https://www.figma.com/design/13xynwNrbY414RYKcDNrv8/PlantAID?node-id=8601-16480)（见 `index.html` 注释）。
+
+**根状态**：**`.screen.identified-sheet-open`**（与 **`setIdentifiedPlantSheetOpen`** 同步 **`aria-hidden`**）。
+
+**遮罩 `#identified-sheet-backdrop`**
+
+| 状态 | `opacity` / `visibility` |
+|------|--------------------------|
+| 关 | `0` / `hidden`，**`pointer-events: none`** |
+| 开 | `1` / `visible`，可点 |
+
+**过渡**：**`opacity` 0.28s** `ease`；关 → 开时 **`visibility`** 无延迟；开 → 关时 **`visibility` 延迟 0.3s** 再隐藏。
+
+**抽屉 `#identified-plant-sheet`**
+
+| 状态 | `transform` | `opacity` |
+|------|-------------|-----------|
+| 关 | **`translate(-50%, 100%)`**（沉在底外） | `0` / `hidden` |
+| 开 | **`translate(-50%, 0)`** | `1` |
+
+**过渡**：**`transform` 0.42s** `cubic-bezier(0.32, 0.72, 0, 1)`；**`opacity`** 关→开 **0.26s** / 开→关 **0.24s** `ease`；**`visibility`** 与 transform 同步延迟（关态 **0.42s** 后再 `hidden`）。
+
+**全屏 Add**：**`.page--add-garden`** 自 **`translateY(100%)`** 滑入 **`translateY(0)`**；**`opacity` 0.26s** `ease`，**`transform` 0.42s** `cubic-bezier(0.32, 0.72, 0, 1)`。
+
+**Add 内提示条 `.add-garden-tip` 关闭**：**`.add-garden-tip--closing`** — `opacity` / `transform` / `max-height` / `margin` / `padding` / `border-width` 等多属性 **0.24s–0.34s** 过渡（收起为 **0** 高、无上内边距）。
+
+**`.add-garden__plant-block`**：**`margin-top`** 随提示条显隐在 **20px ↔ 40px** 间 **0.32s** 过渡（`:has(...)` 规则）。
+
+**层级**：打开识别抽屉时 **`.page-dock`** **`pointer-events: none`**；**`add-garden`** 时 Dock 抬升仍 **`pointer-events: auto`**（见 CSS 注释）。
+
+**`prefers-reduced-motion`**：**`.identified-sheet-backdrop`**、**`.identified-plant-sheet`**、**`.page--add-garden`**、**`.add-garden-tip`**、**`.add-garden__plant-block`**、复选指示器等 **`transition-duration: 0.01ms !important`**。
+
+---
+
+## 25. 脚本交互索引（便于检索）
 
 | 行为 | 脚本入口 |
 |------|-----------|
 | 快捷菜单开关 | `#tab-scan-toggle`、`setOpen` |
-| 导航 Video / Garden | `.action-sheet-row[data-nav-page]`、`.page-dock__fab`、`setActivePage` |
-| 通话阶段 | `setVideoPhase`、`advanceVcToActive`、`vcMediaEnter` / `vcMediaLeave` |
-| Lottie | `ensureVcLottie`、`ensureVcActiveLottie` |
+| 导航 Video / Garden / Add | `.action-sheet-row[data-nav-page]`、`.page-dock__fab`、`setActivePage` |
+| 通话相位 | `setVideoPhase`、`advanceVcToJoining`、`advanceVcFromJoiningToActive`、`vcMediaEnter` / `vcMediaEnterInCall` / `vcMediaLeave` |
+| Lottie | `ensureVcConnectingLottie`、`ensureVcJoiningLottie`、`ensureVcActiveLottie` |
+| 翻转相机 | `toggleVcCameraFacing`、`resetVcCameraFlipVisual`、`VC_CAMERA_FLIP_HALF_MS` |
+| 识别抽屉 | `setIdentifiedPlantSheetOpen`（及 `setActivePage` 内 **post-call** 打开逻辑） |
 | 挂断 vs 收起免音效 | `setActivePage("garden")` vs `setActivePage("garden", { skipHangSound: true })` |
 
 ---
