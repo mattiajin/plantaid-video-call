@@ -2,10 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
-  />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#0d0e12" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -89,6 +86,7 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    /* PlantAID prototype：固定 375×812 画框，不做多端视口 / safe-area 适配 */
     .screen {
       position: relative;
       width: 375px;
@@ -406,7 +404,7 @@
     .vc-hang-wrap {
       position: absolute;
       left: 0;
-      bottom: calc(34px + env(safe-area-inset-bottom, 0px));
+      bottom: 34px;
       width: 375px;
       height: 100px;
       display: flex;
@@ -841,8 +839,7 @@
     #vc-processing-card.vc-processing-card--doctor {
       height: auto;
       min-height: 100px;
-      max-height: min(260px, calc(100vh - 260px));
-      max-height: min(260px, calc(100dvh - 260px));
+      max-height: 260px;
     }
 
     .vc-processing-card--doctor .vc-active-lottie-host {
@@ -869,10 +866,10 @@
       position: absolute;
       left: 50%;
       top: auto;
-      bottom: calc(144px + env(safe-area-inset-bottom, 0px));
+      bottom: 144px;
       transform: translateX(-50%);
       width: 375px;
-      max-width: 100%;
+      max-width: 375px;
       margin: 0;
       padding: 0 28px;
       box-sizing: border-box;
@@ -1077,7 +1074,7 @@
       left: 50%;
       transform: translateX(-50%);
       top: auto;
-      bottom: calc(34px + env(safe-area-inset-bottom, 0px));
+      bottom: 34px;
       width: 375px;
       height: 100px;
       display: flex;
@@ -1118,7 +1115,7 @@
       left: 50%;
       transform: translateX(-50%);
       top: auto;
-      bottom: calc(34px + env(safe-area-inset-bottom, 0px));
+      bottom: 34px;
       width: 375px;
       height: 100px;
       display: flex;
@@ -1886,7 +1883,7 @@
       align-items: flex-start;
       justify-content: center;
       padding-top: 8px;
-      padding-bottom: calc(9px + env(safe-area-inset-bottom, 0px));
+      padding-bottom: 9px;
       box-sizing: border-box;
       background: #ffffff;
     }
@@ -1896,7 +1893,7 @@
       display: block;
       width: 134px;
       height: 5px;
-      max-width: min(134px, 100% - 32px);
+      max-width: 134px;
       object-fit: contain;
       flex-shrink: 0;
     }
@@ -1987,7 +1984,7 @@
        * 底部留白：与固定 footer 同高 · Figma 8601:16870
        * Btn 56 + gap 8 + 滑动控件 34 — 控件框 8629:9594，Bar @ y=20 h=5
        */
-      padding: 0 20px calc(98px + env(safe-area-inset-bottom, 0px));
+      padding: 0 20px 98px;
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -2326,8 +2323,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      /* 控件区止于 812 底缘；额外 safe-area 只在 Bar 下方 */
-      padding: 0 0 env(safe-area-inset-bottom, 0);
+      padding: 0;
       background: #ffffff;
       display: flex;
       flex-direction: column;
@@ -2367,7 +2363,7 @@
       transform: translateX(-50%);
       width: 134px;
       height: 5px;
-      max-width: min(134px, 100% - 32px);
+      max-width: 134px;
       object-fit: contain;
       display: block;
     }
@@ -2805,162 +2801,6 @@
       width: 100%;
       height: 100%;
       object-fit: fill;
-    }
-
-    /*
-     * Mobile Safari / GitHub Pages：去掉「模拟手机框」留白，铺满可视区域；
-     * Garden 隐藏 Figma 状态栏条（系统已有状态栏）；Video 保留嵌入式 status PNG。
-     * 「添加到主屏幕」后可接近全屏（Safari 底栏仍会占用空间，属浏览器限制）。
-     */
-    @media screen and (max-width: 520px) {
-      html {
-        height: 100%;
-        height: -webkit-fill-available;
-      }
-
-      body {
-        align-items: stretch;
-        justify-content: stretch;
-        min-height: 100vh;
-        min-height: -webkit-fill-available;
-        min-height: 100dvh;
-        padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
-          env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
-        background: #0d0e12;
-      }
-
-      .screen {
-        width: 100%;
-        max-width: none;
-        height: auto;
-        min-height: 100vh;
-        min-height: -webkit-fill-available;
-        min-height: 100dvh;
-        border-radius: 0;
-      }
-
-      .page {
-        border-radius: 0;
-      }
-
-      .vc-phase {
-        border-radius: 0;
-      }
-
-      .page--garden .status-strip {
-        display: none;
-      }
-
-      .page--garden .header {
-        width: 100%;
-        height: 56px;
-      }
-
-      .page--garden .title-strip {
-        top: 0;
-      }
-
-      .page--garden .content {
-        top: 72px;
-        width: 100%;
-      }
-
-      .plant-card {
-        width: calc(100% - 40px);
-        max-width: 335px;
-      }
-
-      .header {
-        width: 100%;
-      }
-
-      .status-strip,
-      .status-strip img {
-        width: 100%;
-      }
-
-      .content {
-        width: 100%;
-      }
-
-      .tabbar.screen-tabbar {
-        width: 100%;
-      }
-
-      .home-indicator {
-        width: 100%;
-      }
-
-      .vc-status,
-      .vc-status-img {
-        width: 100%;
-      }
-
-      .vc-hang-wrap {
-        left: 0;
-        transform: none;
-        width: 100%;
-      }
-
-      .vc-home {
-        width: 100%;
-      }
-
-      .vc-active-grad-top,
-      .vc-active-grad-bottom {
-        width: 100%;
-      }
-
-      .vc-call-nav {
-        left: 0;
-        transform: none;
-        width: 100%;
-      }
-
-      .vc-call-hint {
-        width: 100%;
-      }
-
-      .vc-phase-connecting-controls,
-      .vc-active-controls {
-        left: 0;
-        transform: none;
-        width: 100%;
-      }
-
-      .action-sheet {
-        left: 50%;
-        width: min(295px, calc(100% - 32px));
-        transform: translateX(-50%) translateY(calc(100% + 120px));
-      }
-
-      .page--add-garden .add-garden__status {
-        display: none;
-      }
-
-      .identified-plant-sheet {
-        left: 0;
-        width: 100%;
-        max-width: none;
-        transform: translateY(110%);
-      }
-
-      .screen.identified-sheet-open .identified-plant-sheet {
-        transform: translateY(0);
-      }
-
-      .add-garden__status img {
-        width: 100%;
-        height: auto;
-      }
-
-      .add-garden {
-        border-radius: 0;
-      }
-
-      .screen.action-sheet-open .action-sheet {
-        transform: translateX(-50%) translateY(0);
-      }
     }
 
   </style>
