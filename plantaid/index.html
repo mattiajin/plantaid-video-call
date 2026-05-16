@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
   />
   <meta name="theme-color" content="#0d0e12" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -406,7 +406,7 @@
     .vc-hang-wrap {
       position: absolute;
       left: 0;
-      bottom: 34px;
+      bottom: calc(34px + env(safe-area-inset-bottom, 0px));
       width: 375px;
       height: 100px;
       display: flex;
@@ -837,6 +837,14 @@
       border: 1px solid var(--wt20);
     }
 
+    /* Active call doctor bubble (#vc-processing-card): allow wrapped typewriter without clipping joining row */
+    #vc-processing-card.vc-processing-card--doctor {
+      height: auto;
+      min-height: 100px;
+      max-height: min(260px, calc(100vh - 260px));
+      max-height: min(260px, calc(100dvh - 260px));
+    }
+
     .vc-processing-card--doctor .vc-active-lottie-host {
       display: none;
     }
@@ -860,8 +868,9 @@
     .vc-call-hint {
       position: absolute;
       left: 50%;
-      top: 668px;
-      transform: translate(-50%, -100%);
+      top: auto;
+      bottom: calc(144px + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
       width: 375px;
       max-width: 100%;
       margin: 0;
@@ -952,7 +961,8 @@
       scrollbar-width: none;
     }
 
-    .vc-processing-card--doctor .vc-processing-text-wrap,
+    /* Joining spacer + user lane stay at Figma row height */
+    .vc-processing-card.vc-joining-card .vc-processing-text-wrap,
     .vc-processing-card--user .vc-processing-text-wrap {
       max-height: calc(100px - 24px);
     }
@@ -1066,7 +1076,8 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: 678px;
+      top: auto;
+      bottom: calc(34px + env(safe-area-inset-bottom, 0px));
       width: 375px;
       height: 100px;
       display: flex;
@@ -1106,7 +1117,8 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      top: 678px;
+      top: auto;
+      bottom: calc(34px + env(safe-area-inset-bottom, 0px));
       width: 375px;
       height: 100px;
       display: flex;
@@ -1971,7 +1983,11 @@
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
-      padding: 0 20px 148px;
+      /*
+       * 底部留白：与固定 footer 同高 · Figma 8601:16870
+       * Btn 56 + gap 8 + 滑动控件 34 — 控件框 8629:9594，Bar @ y=20 h=5
+       */
+      padding: 0 20px calc(98px + env(safe-area-inset-bottom, 0px));
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -2310,29 +2326,45 @@
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 8px 20px calc(12px + env(safe-area-inset-bottom, 0));
+      /* 控件区止于 812 底缘；额外 safe-area 只在 Bar 下方 */
+      padding: 0 0 env(safe-area-inset-bottom, 0);
       background: #ffffff;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       gap: 8px;
       z-index: 4;
       box-sizing: border-box;
     }
 
-    /* Tab 用的 absolute bar 在白底上会撑满 footer + .home-indicator-img 100% → 整块黑条 */
+    /* Primary CTA · Figma 8629:9596（x20，宽 335）；水平内边距不作用于底部滑动条 */
+    .add-garden__footer-actions {
+      flex-shrink: 0;
+      width: 100%;
+      padding: 0 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /*
+     * 滑动控件 · Figma 8629:9593 — frame 375×34，Bar y=20 h=5（与 .vc-home 一致）
+     * 必须全宽容器，不配左右 20 inset
+     */
     .add-garden__footer .home-indicator-bar {
       position: relative;
-      left: auto;
-      transform: none;
-      top: auto;
-      bottom: auto;
-      width: auto;
-      height: auto;
       flex-shrink: 0;
+      width: 100%;
+      height: 34px;
+      box-sizing: border-box;
     }
 
     .add-garden__footer .home-indicator-img {
+      position: absolute;
+      left: 50%;
+      top: 20px;
+      transform: translateX(-50%);
       width: 134px;
       height: 5px;
       max-width: min(134px, 100% - 32px);
@@ -3296,7 +3328,9 @@
           </div>
         </div>
         <footer class="add-garden__footer">
-          <button type="button" class="add-garden__submit" id="add-garden-submit">Add to Garden</button>
+          <div class="add-garden__footer-actions">
+            <button type="button" class="add-garden__submit" id="add-garden-submit">Add to Garden</button>
+          </div>
           <div class="home-indicator-bar">
             <img class="home-indicator-img" src="assets/tab-home-indicator.svg" alt="" width="134" height="5" decoding="async" />
           </div>
